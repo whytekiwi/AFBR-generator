@@ -17,7 +17,7 @@ test('selects the highest available report revision', () => {
   });
 });
 
-test('retains teams that have not started reports', () => {
+test('retains teams without reports without exposing the report author', () => {
   const model = createDocumentModel({
     inputDirectory: '/input',
     manifest: {
@@ -43,6 +43,42 @@ test('retains teams that have not started reports', () => {
   });
 
   assert.equal(model.departments[0].teams[0].notReceived, true);
+  assert.equal(model.departments[0].teams[0].authorName, null);
+});
+
+test('removes revision-status headings from selected report content', () => {
+  const model = createDocumentModel({
+    inputDirectory: '/input',
+    manifest: {
+      document: { draft: { enabled: true } },
+      frontMatter: {},
+      financials: {},
+    },
+    inserts: [],
+    departments: [
+      {
+        id: 'admin',
+        name: 'Admin',
+        teams: [
+          {
+            id: 'it',
+            name: 'IT Team',
+            report: { AuthorName: 'Taylor' },
+            selectedRevision: {
+              content: {
+                generalOverview: '## Draft overview\n\nCurrent report content.',
+              },
+            },
+          },
+        ],
+      },
+    ],
+  });
+
+  assert.equal(
+    model.departments[0].teams[0].sections[0].markdown,
+    'Current report content.',
+  );
 });
 
 test('loads the complete sample fixture set', async () => {

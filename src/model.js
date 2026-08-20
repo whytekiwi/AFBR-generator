@@ -6,13 +6,8 @@ const REPORT_SECTIONS = [
   ['improvements', 'Recommendations and improvements'],
 ];
 
-function imageInsertsAfterDepartment(inserts, departmentId) {
-  return inserts.filter(
-    (insert) =>
-      insert.type === 'image'
-      && insert.placement?.after?.type === 'department'
-      && insert.placement.after.id === departmentId,
-  );
+function stripRevisionStatusHeading(markdown) {
+  return markdown.replace(/^#{1,6}\s+(?:draft|submitted|final)\s+overview\s*\r?\n(?:\r?\n)?/i, '');
 }
 
 export function createDocumentModel(input) {
@@ -24,12 +19,12 @@ export function createDocumentModel(input) {
       return {
         id: team.id,
         name: team.name,
-        authorName: content?.authorName ?? team.report.AuthorName,
+        authorName: content === null ? null : content?.authorName ?? team.report.AuthorName,
         notReceived: content === null,
         sections: REPORT_SECTIONS.map(([field, title]) => ({
           id: field,
           title,
-          markdown: content?.[field] ?? '',
+          markdown: stripRevisionStatusHeading(content?.[field] ?? ''),
         })),
       };
     }),

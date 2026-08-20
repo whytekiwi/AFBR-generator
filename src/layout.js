@@ -11,7 +11,7 @@ const PX_PER_MM = 96 / 25.4;
 export const BOOKLET_LAYOUT = {
   coverPages: 1,
   continuationContentHeight: 171 * PX_PER_MM,
-  startContentHeight: 142 * PX_PER_MM,
+  startContentHeight: 152 * PX_PER_MM,
 };
 
 function splitOversizedBlock(value) {

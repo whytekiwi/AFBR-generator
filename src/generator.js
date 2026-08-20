@@ -15,7 +15,14 @@ async function measureLayoutBlocks(page, theme, documentModel) {
     Object.fromEntries(
       [...document.querySelectorAll('[data-layout-block]')].map((element) => [
         element.dataset.layoutBlock,
-        element.getBoundingClientRect().height,
+        (() => {
+          const styles = getComputedStyle(element);
+          return (
+            element.getBoundingClientRect().height
+            + Number.parseFloat(styles.marginBlockStart)
+            + Number.parseFloat(styles.marginBlockEnd)
+          );
+        })(),
       ]),
     ),
   );

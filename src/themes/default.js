@@ -50,7 +50,7 @@ function departmentIdentity(department) {
 function renderBlock(block) {
   switch (block.type) {
     case 'team-heading':
-      return `<section class="layout-block team-heading" data-layout-block="${escapeHtml(block.id)}"><h2>${escapeHtml(block.team.name)}</h2>${block.team.authorName ? `<p class="author">Report author: ${escapeHtml(block.team.authorName)}</p>` : ''}</section>`;
+      return `<section class="layout-block team-heading" data-layout-block="${escapeHtml(block.id)}"><div class="team-heading-row"><h2>${escapeHtml(block.team.name)}</h2>${block.team.authorName ? `<p class="author">${escapeHtml(block.team.authorName)}</p>` : ''}</div></section>`;
     case 'not-received':
       return `<section class="layout-block not-received" data-layout-block="${escapeHtml(block.id)}"><strong>Not received</strong><p>This team has not supplied a report.</p></section>`;
     case 'report-section-heading':
@@ -71,15 +71,16 @@ function bodyStyles() {
     h1, h2, h3, p { margin-top: 0; }
     .layout-block { break-inside: avoid; padding-bottom: 3mm; }
     .team-heading { border-bottom: 1px solid #cbd2d9; margin-bottom: 2mm; padding-bottom: 3mm; }
-    .team-heading h2 { font-size: 16pt; line-height: 1.15; margin-bottom: 1.5mm; }
-    .author { color: #52606d; font-size: 8.5pt; margin-bottom: 0; }
+    .team-heading-row { align-items: baseline; display: flex; gap: 4mm; justify-content: space-between; }
+    .team-heading h2 { flex: 1 1 auto; font-size: 16pt; line-height: 1.15; margin: 0; min-width: 0; }
+    .author { color: #52606d; flex: 0 0 auto; font-size: 8.5pt; margin: 0; text-align: right; }
     .report-section-heading { padding-bottom: 1mm; }
     .report-section-heading h3 { color: #243b53; font-size: 11pt; line-height: 1.2; margin: 0; }
     .report-markdown { overflow-wrap: anywhere; padding-bottom: 3mm; }
     .report-markdown p { margin-bottom: 2.5mm; }
     .report-markdown ul, .report-markdown ol { margin: 0 0 2.5mm; padding-left: 5mm; }
     .report-empty p, .not-received p { color: #667085; font-style: italic; margin-bottom: 0; }
-    .not-received { background: #f5f7fa; border-left: 2mm solid #98a2b3; padding: 4mm 5mm; }
+    .not-received { background: #f5f7fa; border-left: 2mm solid #98a2b3; margin-bottom: 4mm; padding: 4mm 5mm; }
   `;
 }
 
@@ -129,7 +130,7 @@ async function renderSpread(spread, model, plan) {
     (slot) => `<article class="booklet-page">${renderBlocks(slot.units, plan.blocks)}</article>`,
   );
   const hero = isStart
-    ? `<header class="department-hero"><p>Department reports</p><h1>${escapeHtml(spread.department.name)}</h1></header>`
+    ? `<header class="department-hero"><h1>${escapeHtml(spread.department.name)}</h1></header>`
     : `<aside class="department-rail" aria-label="${escapeHtml(spread.department.name)} department">${escapeHtml(spread.department.name)}</aside>`;
 
   return `<section class="spread ${className}" style="--department-colour: ${identity.colour}">${hero}<div class="spread-grid">${pages.join('')}</div><span class="page-number">${spread.pdfPageNumber}</span>${renderWatermark(model.document)}</section>`;
@@ -146,6 +147,6 @@ export const defaultTheme = {
   },
   async renderBody(model, plan) {
     const spreads = await Promise.all(plan.spreads.map((spread) => renderSpread(spread, model, plan)));
-    return `<!doctype html><html><head><meta charset="utf-8"><style>@page { size: A4 landscape; margin: 0; } ${bodyStyles()} body { background: white; } .spread { break-after: page; height: 210mm; overflow: hidden; padding: 10mm; position: relative; width: 297mm; } .spread-grid { display: grid; gap: 4mm; grid-template-columns: repeat(2, minmax(0, 1fr)); height: 190mm; } .booklet-page { background: #fff; min-width: 0; padding: 9mm; } .front-spread .booklet-page, .final-spread .booklet-page { background: #f8fafc; } .front-spread h2, .final-spread h2 { font-size: 22pt; line-height: 1.16; } .eyebrow { color: #52606d; font-size: 8pt; font-weight: bold; letter-spacing: .14em; text-transform: uppercase; } .contents-list { list-style: none; margin: 8mm 0 0; padding: 0; } .contents-list li { border-bottom: 1px solid #d9e2ec; display: flex; justify-content: space-between; padding: 2.4mm 0; } .department-hero { background: var(--department-colour); color: white; height: 30mm; margin: -10mm -10mm 0; padding: 7mm 10mm; } .department-hero p { font-size: 8pt; letter-spacing: .14em; margin: 0 0 1mm; text-transform: uppercase; } .department-hero h1 { font-size: 27pt; line-height: 1; margin: 0; } .department-start .spread-grid { height: 160mm; } .department-continuation { padding-left: 17mm; } .department-continuation .spread-grid { height: 190mm; } .department-continuation .booklet-page { border-top: 1mm solid var(--department-colour); } .department-rail { background: var(--department-colour); bottom: 0; color: white; font-size: 8pt; font-weight: bold; left: 0; letter-spacing: .12em; padding: 8mm 3mm; position: absolute; text-orientation: mixed; text-transform: uppercase; top: 0; writing-mode: vertical-rl; } .image-spread { align-items: center; display: flex; justify-content: center; } .image-spread figure { margin: 0; max-height: 180mm; max-width: 260mm; text-align: center; } .image-spread img { display: block; height: auto; max-height: 170mm; max-width: 100%; } figcaption { color: #52606d; font-size: 8.5pt; margin-top: 3mm; } .page-number { bottom: 4mm; color: #667085; font-size: 8pt; position: absolute; right: 7mm; } .watermark { color: rgba(128, 0, 0, .16); font-size: 64pt; font-weight: bold; left: 50%; pointer-events: none; position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(-35deg); z-index: 2; }</style></head><body>${spreads.join('')}</body></html>`;
+    return `<!doctype html><html><head><meta charset="utf-8"><style>@page { size: A4 landscape; margin: 0; } ${bodyStyles()} body { background: white; } .spread { break-after: page; height: 210mm; overflow: hidden; padding: 10mm; position: relative; width: 297mm; } .spread-grid { display: grid; gap: 4mm; grid-template-columns: repeat(2, minmax(0, 1fr)); height: 190mm; } .booklet-page { background: #fff; min-width: 0; padding: 9mm; } .front-spread .booklet-page, .final-spread .booklet-page { background: #f8fafc; } .front-spread h2, .final-spread h2 { font-size: 22pt; line-height: 1.16; } .eyebrow { color: #52606d; font-size: 8pt; font-weight: bold; letter-spacing: .14em; text-transform: uppercase; } .contents-list { list-style: none; margin: 8mm 0 0; padding: 0; } .contents-list li { border-bottom: 1px solid #d9e2ec; display: flex; justify-content: space-between; padding: 2.4mm 0; } .department-hero { align-items: center; background: var(--department-colour); color: white; display: flex; height: 20mm; margin: -10mm -10mm 0; padding: 4.5mm 10mm; } .department-hero h1 { font-size: 22pt; line-height: 1; margin: 0; } .department-start .spread-grid { height: 170mm; } .department-continuation { padding-left: 17mm; } .department-continuation .spread-grid { height: 190mm; } .department-continuation .booklet-page { border-top: 1mm solid var(--department-colour); } .department-rail { background: var(--department-colour); bottom: 0; color: white; font-size: 8pt; font-weight: bold; left: 0; letter-spacing: .12em; padding: 8mm 3mm; position: absolute; text-orientation: mixed; text-transform: uppercase; top: 0; writing-mode: vertical-rl; } .image-spread { align-items: center; display: flex; justify-content: center; } .image-spread figure { margin: 0; max-height: 180mm; max-width: 260mm; text-align: center; } .image-spread img { display: block; height: auto; max-height: 170mm; max-width: 100%; } figcaption { color: #52606d; font-size: 8.5pt; margin-top: 3mm; } .page-number { bottom: 4mm; color: #667085; font-size: 8pt; position: absolute; right: 7mm; } .watermark { color: rgba(128, 0, 0, .16); font-size: 64pt; font-weight: bold; left: 50%; pointer-events: none; position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(-35deg); z-index: 2; }</style></head><body>${spreads.join('')}</body></html>`;
   },
 };
