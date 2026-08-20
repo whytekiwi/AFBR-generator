@@ -134,11 +134,12 @@ For each team, select the most finalised available revision in this order:
 4. `NotStarted`
 
 A revision is available when its supplied object contains report content. The
-top-level `Status` may be displayed as metadata but must not override a more
-final available revision.
+top-level `Status` is internal source metadata: it must not be shown in the PDF
+and must not override a more-final available revision.
 
 Teams with no available revision are still rendered. They must receive a
-consistent, clearly labelled empty state rather than being omitted.
+single, clearly labelled “Not received” state rather than being omitted. Do not
+render their individual report-section headings or empty section states.
 
 ### Report Sections
 
@@ -156,6 +157,20 @@ it must not be hidden if the report template requires that section.
 
 `authorName` identifies the revision author and may be rendered according to
 the visual design.
+
+### Report Layout
+
+- A report's source status must never be displayed; the selected revision is
+  rendered as a completed report regardless of whether it originated as a
+  draft, submission, or final.
+- The landscape PDF is a two-page, vertically oriented booklet spread. The
+  left and right halves are virtual booklet pages.
+- Report content must fill the left virtual page first, then overflow to the
+  right virtual page only when the left page is full. It may continue onto the
+  next physical PDF spread when both virtual pages are full.
+- Reports form one continuous reading flow within a department. Short reports
+  may stack vertically in the remaining space of a virtual page; they must not
+  be moved to the right virtual page merely to start a new report.
 
 ### Text Formatting
 
@@ -269,3 +284,71 @@ The following are required before implementation is complete:
 - final Markdown subset and heading mappings;
 - page numbering convention; and
 - financial screenshot layout, captions, and source-data format.
+
+## Template Redesign Baseline
+
+The selected implementation checkpoint before the template redesign is commit
+`3367141` (`Bootstrap afterburn report generator`). The next template should be
+rebuilt from that bootstrap rather than incrementally adapting experimental
+layout code.
+
+### Selected Format Direction
+
+- The document begins with a single A5 portrait cover page.
+- All following PDF pages are A4 landscape.
+- Each landscape PDF page represents two vertical virtual booklet pages: a left
+  page and a right page.
+- Report content reads through those virtual pages in order: left page, right
+  page, then the next physical PDF spread.
+- Use a subtle rain-and-rainbow aesthetic. Rainbow treatment is restrained;
+  every department receives a distinct, accessible flat colour.
+- Department identity uses one horizontal hero header at the department start
+  and a vertical continuation rail on subsequent department spreads.
+
+### Structural Requirements
+
+- Separate document structure from visual styling. The rendering pipeline owns
+  pagination, virtual-page geometry, department boundaries, contents anchors,
+  and header placement. Themes own only visual tokens and markup within
+  defined template slots.
+- Model the virtual left and right pages explicitly. Do not rely on generic CSS
+  multi-column fragmentation to decide how content crosses the virtual-page
+  boundary.
+- Calculate page-specific elements, including continuation rails, from a
+  deterministic final spread plan before rendering. Do not infer their
+  placement from browser element positions after layout.
+- Render the A5 cover and A4 landscape body as separate segments, then merge
+  them into a single PDF. Apply a defined page-number offset so contents
+  references use final document page numbers.
+- Derive each department's hero header, continuation rail, and contents cue
+  from the same department identity token. Colour must supplement readable
+  text and never be the only means of identification.
+- A team without a selected report revision renders one “Not received” state.
+  Do not display internal lifecycle status or empty report-section scaffolding.
+- Preserve natural reading order and efficient density. Keep section blocks
+  intact where practical, avoid wasteful divider pages, and do not invent
+  summaries or other prose.
+
+### Accessibility Requirements
+
+- Body text, headings, links, captions, empty states, and watermarks must meet
+  readable contrast expectations.
+- Decorative texture, rain, and rainbow effects must not sit behind body text
+  or otherwise interfere with reading.
+- Maintain a clear typographic hierarchy and readable type sizes.
+- Do not encode meaning through colour alone.
+- Preserve image alternative text in source HTML and provide visible captions
+  where supplied.
+
+### Fixed Template Vocabulary
+
+The redesigned template should use explicit, reusable templates for:
+
+1. A5 cover.
+2. Front-matter pages.
+3. Contents.
+4. Department-start spread.
+5. Department-continuation spread.
+6. Team report.
+7. Static image insert.
+8. Financials.

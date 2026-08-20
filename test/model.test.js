@@ -42,10 +42,7 @@ test('retains teams that have not started reports', () => {
     ],
   });
 
-  assert.equal(
-    model.sections.find((section) => section.type === 'team-report').reportStage,
-    'not-started',
-  );
+  assert.equal(model.departments[0].teams[0].notReceived, true);
 });
 
 test('loads the complete sample fixture set', async () => {

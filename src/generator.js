@@ -1,60 +1,88 @@
-import { mkdir } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { chromium } from 'playwright';
+import { PDFDocument } from 'pdf-lib';
+import { createSpreadPlan } from './layout.js';
 
-const A4_HEIGHT_PX = 1122.519685;
+async function measureLayoutBlocks(page, theme, documentModel) {
+  await page.setContent(await theme.renderMeasurement(documentModel), {
+    waitUntil: 'load',
+  });
+  await page.evaluate(() => document.fonts.ready);
 
-async function measureDepartmentPages(page) {
-  return page.evaluate((pageHeight) => {
-    return Object.fromEntries(
-      [...document.querySelectorAll('[data-toc-id]')].map((element) => [
-        element.dataset.tocId,
-        Math.floor(element.getBoundingClientRect().top / pageHeight) + 1,
+  return page.evaluate(() =>
+    Object.fromEntries(
+      [...document.querySelectorAll('[data-layout-block]')].map((element) => [
+        element.dataset.layoutBlock,
+        element.getBoundingClientRect().height,
       ]),
-    );
-  }, A4_HEIGHT_PX);
+    ),
+  );
 }
 
-function samePages(left, right) {
-  return JSON.stringify(left) === JSON.stringify(right);
+async function mergePdfs(paths) {
+  const merged = await PDFDocument.create();
+
+  for (const path of paths) {
+    const source = await PDFDocument.load(await readFile(path));
+    const pages = await merged.copyPages(source, source.getPageIndices());
+    pages.forEach((pdfPage) => merged.addPage(pdfPage));
+  }
+
+  return merged.save();
+}
+
+async function verifyPageCount(path, expectedPageCount, segmentName) {
+  const document = await PDFDocument.load(await readFile(path));
+  if (document.getPageCount() !== expectedPageCount) {
+    throw new Error(
+      `${segmentName} rendered ${document.getPageCount()} pages; expected ${expectedPageCount}`,
+    );
+  }
 }
 
 export async function generatePdf({ documentModel, outputFile, theme }) {
   await mkdir(dirname(outputFile), { recursive: true });
 
   const browser = await chromium.launch({ headless: true });
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), 'afterburn-report-'));
   try {
     const page = await browser.newPage();
-    let pageNumbers = Object.fromEntries(
-      documentModel.tableOfContents.map(({ id }) => [id, 0]),
-    );
+    const measurements = await measureLayoutBlocks(page, theme, documentModel);
+    const plan = createSpreadPlan(documentModel, measurements);
+    const coverPath = join(temporaryDirectory, 'cover.pdf');
+    const bodyPath = join(temporaryDirectory, 'body.pdf');
 
-    for (let pass = 0; pass < 3; pass += 1) {
-      await page.setContent(await theme.render(documentModel, pageNumbers), {
-        waitUntil: 'load',
-      });
-      await page.emulateMedia({ media: 'print' });
-      await page.evaluate(() => document.fonts.ready);
-
-      const measuredPages = await measureDepartmentPages(page);
-      if (samePages(pageNumbers, measuredPages)) break;
-      pageNumbers = measuredPages;
-    }
-
-    await page.setContent(await theme.render(documentModel, pageNumbers), {
+    await page.setContent(await theme.renderCover(documentModel), {
       waitUntil: 'load',
     });
     await page.emulateMedia({ media: 'print' });
     await page.evaluate(() => document.fonts.ready);
     await page.pdf({
-      path: outputFile,
+      path: coverPath,
       preferCSSPageSize: true,
       printBackground: true,
-      ...theme.pdfOptions,
     });
 
-    return pageNumbers;
+    await page.setContent(await theme.renderBody(documentModel, plan), {
+      waitUntil: 'load',
+    });
+    await page.emulateMedia({ media: 'print' });
+    await page.evaluate(() => document.fonts.ready);
+    await page.pdf({
+      path: bodyPath,
+      preferCSSPageSize: true,
+      printBackground: true,
+    });
+
+    await verifyPageCount(coverPath, 1, 'Cover');
+    await verifyPageCount(bodyPath, plan.spreads.length, 'Body');
+    await writeFile(outputFile, await mergePdfs([coverPath, bodyPath]));
+
+    return plan.pageNumbers;
   } finally {
     await browser.close();
+    await rm(temporaryDirectory, { recursive: true, force: true });
   }
 }
