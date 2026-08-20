@@ -1,5 +1,6 @@
 import { access, readFile } from 'node:fs/promises';
-import { resolve, sep } from 'node:path';
+import { extname, resolve, sep } from 'node:path';
+import { parseReportMarkdown } from './report-document.js';
 
 const REPORT_STAGES = [
   ['ReportFinal', 'final'],
@@ -23,6 +24,29 @@ async function readJson(path) {
     return JSON.parse(contents.replace(/^\uFEFF/, ''));
   } catch (error) {
     fail(path, `invalid JSON (${error.message})`);
+  }
+}
+
+async function readReport(path) {
+  if (extname(path).toLowerCase() !== '.md') return readJson(path);
+
+  let contents;
+  try {
+    contents = await readFile(path, 'utf8');
+  } catch {
+    fail(path, 'could not be read');
+  }
+
+  try {
+    const report = parseReportMarkdown(contents.replace(/^\uFEFF/, ''));
+    return {
+      Team: report.team,
+      Department: report.department,
+      AuthorName: report.authorName,
+      ReportFinal: report,
+    };
+  } catch (error) {
+    fail(path, error instanceof Error ? error.message : 'invalid Markdown report');
   }
 }
 
@@ -124,7 +148,7 @@ export async function loadInput(inputDirectory) {
       teamIds.add(teamId);
 
       const reportPath = resolveWithin(inputDirectory, reportFile, `${teamLocation}.reportFile`);
-      const report = await readJson(reportPath);
+      const report = await readReport(reportPath);
       if (!isObject(report)) fail(reportPath, 'must contain an object');
       if (report.Team !== teamName) fail(reportPath, `Team must equal "${teamName}"`);
       if (report.Department !== name) fail(reportPath, `Department must equal "${name}"`);
