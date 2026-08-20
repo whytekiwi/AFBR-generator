@@ -1,6 +1,6 @@
-import { resolve } from 'node:path';
+import { extname, resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { extname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { renderMarkdown } from '../markdown.js';
 import { createLayoutBlocks } from '../layout.js';
 
@@ -12,6 +12,13 @@ const MIME_TYPES = {
   '.svg': 'image/svg+xml',
   '.webp': 'image/webp',
 };
+const COVER_HERO_PATH = fileURLToPath(
+  new URL('../../assets/afterburn-report-hero.jpg', import.meta.url),
+);
+const COVER_LOGO_PATH = fileURLToPath(
+  new URL('../../assets/kiwiburn-logo-tagline-white.png', import.meta.url),
+);
+const COVER_HERO_CREDIT = '2026 Temple Burn. Design by Kym Skelton. Photo by John Williams.';
 
 function escapeHtml(value = '') {
   return String(value)
@@ -22,11 +29,14 @@ function escapeHtml(value = '') {
     .replaceAll("'", '&#39;');
 }
 
-async function imageSource(src, inputDirectory) {
-  const path = resolve(inputDirectory, src);
+async function imageDataUri(path) {
   const bytes = await readFile(path);
   const mimeType = MIME_TYPES[extname(path).toLowerCase()] ?? 'application/octet-stream';
   return `data:${mimeType};base64,${bytes.toString('base64')}`;
+}
+
+async function imageSource(src, inputDirectory) {
+  return imageDataUri(resolve(inputDirectory, src));
 }
 
 const DEPARTMENT_COLOURS = [
@@ -94,6 +104,10 @@ function renderWatermark(document) {
     : '';
 }
 
+function renderPageFooter(document, pageNumber) {
+  return `<footer class="page-footer"><span>Kiwiburn ${escapeHtml(document.cycle)} - Afterburn Report</span><span>${pageNumber}</span></footer>`;
+}
+
 function renderFrontSlot(slot, model, pageNumbers) {
   switch (slot.type) {
     case 'contents':
@@ -112,15 +126,15 @@ function renderFrontSlot(slot, model, pageNumbers) {
 async function renderSpread(spread, model, plan) {
   if (spread.type === 'image-insert') {
     const source = await imageSource(spread.insert.src, model.inputDirectory);
-    return `<section class="spread image-spread"><figure><img src="${source}" alt="${escapeHtml(spread.insert.altText ?? '')}">${spread.insert.caption ? `<figcaption>${escapeHtml(spread.insert.caption)}</figcaption>` : ''}</figure><span class="page-number">${spread.pdfPageNumber}</span>${renderWatermark(model.document)}</section>`;
+    return `<section class="spread image-spread"><figure><img src="${source}" alt="${escapeHtml(spread.insert.altText ?? '')}">${spread.insert.caption ? `<figcaption>${escapeHtml(spread.insert.caption)}</figcaption>` : ''}</figure>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
   }
 
   if (spread.type === 'financials') {
-    return `<section class="spread final-spread"><div class="spread-grid"><article class="booklet-page"><p class="eyebrow">Final section</p><h2>${escapeHtml(spread.financials.title ?? 'Financials')}</h2><p>Financial information will be supplied later.</p></article><article class="booklet-page blank-page"></article></div><span class="page-number">${spread.pdfPageNumber}</span>${renderWatermark(model.document)}</section>`;
+    return `<section class="spread final-spread"><div class="spread-grid"><article class="booklet-page"><p class="eyebrow">Final section</p><h2>${escapeHtml(spread.financials.title ?? 'Financials')}</h2><p>Financial information will be supplied later.</p></article><article class="booklet-page blank-page"></article></div>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
   }
 
   if (spread.type === 'front-matter') {
-    return `<section class="spread front-spread"><div class="spread-grid">${spread.slots.map((slot) => `<article class="booklet-page">${renderFrontSlot(slot, model, plan.pageNumbers)}</article>`).join('')}</div><span class="page-number">${spread.pdfPageNumber}</span>${renderWatermark(model.document)}</section>`;
+    return `<section class="spread front-spread"><div class="spread-grid">${spread.slots.map((slot) => `<article class="booklet-page">${renderFrontSlot(slot, model, plan.pageNumbers)}</article>`).join('')}</div>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
   }
 
   const identity = departmentIdentity(spread.department);
@@ -133,7 +147,7 @@ async function renderSpread(spread, model, plan) {
     ? `<header class="department-hero"><h1>${escapeHtml(spread.department.name)}</h1></header>`
     : `<aside class="department-rail" aria-label="${escapeHtml(spread.department.name)} department">${escapeHtml(spread.department.name)}</aside>`;
 
-  return `<section class="spread ${className}" style="--department-colour: ${identity.colour}">${hero}<div class="spread-grid">${pages.join('')}</div><span class="page-number">${spread.pdfPageNumber}</span>${renderWatermark(model.document)}</section>`;
+  return `<section class="spread ${className}" style="--department-colour: ${identity.colour}">${hero}<div class="spread-grid">${pages.join('')}</div>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
 }
 
 export const defaultTheme = {
@@ -143,10 +157,14 @@ export const defaultTheme = {
     return `<!doctype html><html><head><meta charset="utf-8"><style>${bodyStyles()} .measurement-column { width: 118.5mm; }</style></head><body><main class="measurement-column">${Object.values(blocks).map(renderBlock).join('')}</main></body></html>`;
   },
   async renderCover(model) {
-    return `<!doctype html><html><head><meta charset="utf-8"><style>@page { size: A5 portrait; margin: 0; } * { box-sizing: border-box; } body { margin: 0; color: #1f2933; font-family: Arial, sans-serif; } .cover { align-items: center; background: #f5f8fa; display: flex; height: 210mm; justify-content: center; padding: 24mm; position: relative; text-align: center; } .eyebrow { font-size: 8pt; font-weight: bold; letter-spacing: .16em; text-transform: uppercase; } h1 { font-size: 31pt; line-height: 1.12; margin: 4mm 0; } .cover-rule { background: #2f6690; height: 2mm; margin: 8mm auto; width: 34mm; } .watermark { color: rgba(128, 0, 0, .18); font-size: 48pt; font-weight: bold; left: 50%; position: fixed; top: 50%; transform: translate(-50%, -50%) rotate(-35deg); }</style></head><body><main class="cover"><div><p class="eyebrow">${escapeHtml(model.document.cycle)}</p><div class="cover-rule"></div><h1>${escapeHtml(model.document.title)}</h1><p>Afterburn report booklet</p></div>${renderWatermark(model.document)}</main></body></html>`;
+    const [heroImage, logoImage] = await Promise.all([
+      imageDataUri(COVER_HERO_PATH),
+      imageDataUri(COVER_LOGO_PATH),
+    ]);
+    return `<!doctype html><html><head><meta charset="utf-8"><style>@page { size: A5 portrait; margin: 0; } * { box-sizing: border-box; } body { margin: 0; color: #1f2933; font-family: Arial, sans-serif; } .cover { background: #f5f8fa; display: flex; flex-direction: column; height: 210mm; overflow: hidden; position: relative; } .cover-branding { align-items: center; background: #1f2933; display: flex; height: 105mm; justify-content: center; padding: 16mm; } .cover-branding img { max-height: 72mm; max-width: 112mm; object-fit: contain; } .cover-copy { align-items: center; display: flex; height: 33mm; justify-content: center; padding: 5mm 18mm; text-align: center; } .cover-copy h1 { font-size: 23pt; line-height: 1.12; margin: 0; } .cover-hero { height: 72mm; margin: 0; position: relative; } .cover-hero img { display: block; height: 100%; object-fit: cover; object-position: center center; width: 100%; } .cover-hero figcaption { background: rgba(0, 0, 0, .65); bottom: 0; color: white; font-size: 7pt; padding: 2mm 3mm; position: absolute; right: 0; } .watermark { color: rgba(128, 0, 0, .18); font-size: 48pt; font-weight: bold; left: 50%; position: fixed; top: 50%; transform: translate(-50%, -50%) rotate(-35deg); z-index: 1; }</style></head><body><main class="cover"><section class="cover-branding"><img src="${logoImage}" alt="Kiwiburn logo and tagline"></section><section class="cover-copy"><h1>${escapeHtml(model.document.cycle)} Afterburn Report</h1></section><figure class="cover-hero"><img src="${heroImage}" alt="${escapeHtml(COVER_HERO_CREDIT)}"><figcaption>${escapeHtml(COVER_HERO_CREDIT)}</figcaption></figure>${renderWatermark(model.document)}</main></body></html>`;
   },
   async renderBody(model, plan) {
     const spreads = await Promise.all(plan.spreads.map((spread) => renderSpread(spread, model, plan)));
-    return `<!doctype html><html><head><meta charset="utf-8"><style>@page { size: A4 landscape; margin: 0; } ${bodyStyles()} body { background: white; } .spread { break-after: page; height: 210mm; overflow: hidden; padding: 10mm; position: relative; width: 297mm; } .spread-grid { display: grid; gap: 4mm; grid-template-columns: repeat(2, minmax(0, 1fr)); height: 190mm; } .booklet-page { background: #fff; min-width: 0; padding: 9mm; } .front-spread .booklet-page, .final-spread .booklet-page { background: #f8fafc; } .front-spread h2, .final-spread h2 { font-size: 22pt; line-height: 1.16; } .eyebrow { color: #52606d; font-size: 8pt; font-weight: bold; letter-spacing: .14em; text-transform: uppercase; } .contents-list { list-style: none; margin: 8mm 0 0; padding: 0; } .contents-list li { border-bottom: 1px solid #d9e2ec; display: flex; justify-content: space-between; padding: 2.4mm 0; } .department-hero { align-items: center; background: var(--department-colour); color: white; display: flex; height: 20mm; margin: -10mm -10mm 0; padding: 4.5mm 10mm; } .department-hero h1 { font-size: 22pt; line-height: 1; margin: 0; } .department-start .spread-grid { height: 170mm; } .department-continuation { padding-left: 17mm; } .department-continuation .spread-grid { height: 190mm; } .department-continuation .booklet-page { border-top: 1mm solid var(--department-colour); } .department-rail { background: var(--department-colour); bottom: 0; color: white; font-size: 8pt; font-weight: bold; left: 0; letter-spacing: .12em; padding: 8mm 3mm; position: absolute; text-orientation: mixed; text-transform: uppercase; top: 0; writing-mode: vertical-rl; } .image-spread { align-items: center; display: flex; justify-content: center; } .image-spread figure { margin: 0; max-height: 180mm; max-width: 260mm; text-align: center; } .image-spread img { display: block; height: auto; max-height: 170mm; max-width: 100%; } figcaption { color: #52606d; font-size: 8.5pt; margin-top: 3mm; } .page-number { bottom: 4mm; color: #667085; font-size: 8pt; position: absolute; right: 7mm; } .watermark { color: rgba(128, 0, 0, .16); font-size: 64pt; font-weight: bold; left: 50%; pointer-events: none; position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(-35deg); z-index: 2; }</style></head><body>${spreads.join('')}</body></html>`;
+    return `<!doctype html><html><head><meta charset="utf-8"><style>@page { size: A4 landscape; margin: 0; } ${bodyStyles()} body { background: white; } .spread { break-after: page; height: 210mm; overflow: hidden; padding: 10mm; position: relative; width: 297mm; } .spread-grid { display: grid; gap: 4mm; grid-template-columns: repeat(2, minmax(0, 1fr)); height: 190mm; } .booklet-page { background: #fff; min-width: 0; padding: 9mm; } .front-spread .booklet-page, .final-spread .booklet-page { background: #f8fafc; } .front-spread h2, .final-spread h2 { font-size: 22pt; line-height: 1.16; } .eyebrow { color: #52606d; font-size: 8pt; font-weight: bold; letter-spacing: .14em; text-transform: uppercase; } .contents-list { list-style: none; margin: 8mm 0 0; padding: 0; } .contents-list li { border-bottom: 1px solid #d9e2ec; display: flex; justify-content: space-between; padding: 2.4mm 0; } .department-hero { align-items: center; background: var(--department-colour); color: white; display: flex; height: 20mm; margin: -10mm -10mm 0; padding: 4.5mm 10mm; } .department-hero h1 { font-size: 22pt; line-height: 1; margin: 0; } .department-start .spread-grid { height: 170mm; } .department-continuation { padding-left: 17mm; } .department-continuation .spread-grid { height: 190mm; } .department-continuation .booklet-page { border-top: 1mm solid var(--department-colour); } .department-rail { background: var(--department-colour); bottom: 0; color: white; font-size: 8pt; font-weight: bold; left: 0; letter-spacing: .12em; padding: 8mm 3mm; position: absolute; text-orientation: mixed; text-transform: uppercase; top: 0; writing-mode: vertical-rl; } .image-spread { align-items: center; display: flex; justify-content: center; } .image-spread figure { margin: 0; max-height: 180mm; max-width: 260mm; text-align: center; } .image-spread img { display: block; height: auto; max-height: 170mm; max-width: 100%; } figcaption { color: #52606d; font-size: 8.5pt; margin-top: 3mm; } .page-footer { bottom: 4mm; color: #667085; display: flex; font-size: 8pt; justify-content: space-between; left: 10mm; position: absolute; right: 7mm; } .department-continuation .page-footer { left: 20mm; } .watermark { color: rgba(128, 0, 0, .16); font-size: 64pt; font-weight: bold; left: 50%; pointer-events: none; position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(-35deg); z-index: 2; }</style></head><body>${spreads.join('')}</body></html>`;
   },
 };
