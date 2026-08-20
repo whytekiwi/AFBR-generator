@@ -1,0 +1,18 @@
+﻿{
+    "Team":  "Ticketing",
+    "Department":  "Services",
+    "AuthorName":  "Casey Lee",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Ari Wilson",
+    "ReportSubmission":  {
+
+                         },
+    "ReportDraft":  {
+
+                    },
+    "ReportFinal":  {
+
+                    },
+    "Status":  "NotStarted",
+    "LastModified":  "2026-04-01T15:28:00+12:00"
+}

@@ -1,0 +1,33 @@
+﻿{
+    "Team":  "Sustainability",
+    "Department":  "Governance",
+    "AuthorName":  "Jordan Patel",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Drew Martin",
+    "ReportSubmission":  {
+                             "authorName":  "Jordan Patel",
+                             "generalOverview":  "## Submitted overview\n\nThe Sustainability team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                             "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                             "resources":  "The team had the core tools required to deliver its responsibilities.",
+                             "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                             "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                         },
+    "ReportDraft":  {
+                        "authorName":  "Jordan Patel",
+                        "generalOverview":  "## Draft overview\n\nThe Sustainability team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "The team had the core tools required to deliver its responsibilities.",
+                        "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                        "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                    },
+    "ReportFinal":  {
+                        "authorName":  "Jordan Patel",
+                        "generalOverview":  "## Final overview\n\nThe Sustainability team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "The team had the core tools required to deliver its responsibilities.",
+                        "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                        "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                    },
+    "Status":  "ReportFinal",
+    "LastModified":  "2026-04-20T15:28:00+12:00"
+}

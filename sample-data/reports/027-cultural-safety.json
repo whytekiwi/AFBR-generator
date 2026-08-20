@@ -1,0 +1,28 @@
+﻿{
+    "Team":  "Cultural Safety",
+    "Department":  "Community",
+    "AuthorName":  "Casey Lee",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Charlie Singh",
+    "ReportSubmission":  {
+                             "authorName":  "Casey Lee",
+                             "generalOverview":  "## Submitted overview\n\nThe Cultural Safety team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                             "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                             "resources":  "The team had the core tools required to deliver its responsibilities.",
+                             "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                             "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                         },
+    "ReportDraft":  {
+                        "authorName":  "Casey Lee",
+                        "generalOverview":  "## Draft overview\n\nThe Cultural Safety team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "The team had the core tools required to deliver its responsibilities.",
+                        "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                        "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                    },
+    "ReportFinal":  {
+
+                    },
+    "Status":  "ReportSubmission",
+    "LastModified":  "2026-04-27T15:28:00+12:00"
+}

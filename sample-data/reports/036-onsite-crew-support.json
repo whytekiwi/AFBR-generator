@@ -1,0 +1,33 @@
+﻿{
+    "Team":  "Onsite Crew Support",
+    "Department":  "Crew",
+    "AuthorName":  "Alex Morgan",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Drew Martin",
+    "ReportSubmission":  {
+                             "authorName":  "Alex Morgan",
+                             "generalOverview":  "## Submitted overview\n\nThe Onsite Crew Support team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                             "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                             "resources":  "The team had the core tools required to deliver its responsibilities.",
+                             "budgetAnalysis":  "",
+                             "improvements":  ""
+                         },
+    "ReportDraft":  {
+                        "authorName":  "Alex Morgan",
+                        "generalOverview":  "## Draft overview\n\nThe Onsite Crew Support team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "The team had the core tools required to deliver its responsibilities.",
+                        "budgetAnalysis":  "",
+                        "improvements":  ""
+                    },
+    "ReportFinal":  {
+                        "authorName":  "Alex Morgan",
+                        "generalOverview":  "## Final overview\n\nThe Onsite Crew Support team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "The team had the core tools required to deliver its responsibilities.",
+                        "budgetAnalysis":  "",
+                        "improvements":  ""
+                    },
+    "Status":  "ReportFinal",
+    "LastModified":  "2026-04-08T15:28:00+12:00"
+}

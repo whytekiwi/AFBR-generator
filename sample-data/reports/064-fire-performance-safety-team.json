@@ -1,0 +1,33 @@
+﻿{
+    "Team":  "Fire Performance Safety Team",
+    "Department":  "Site Safety",
+    "AuthorName":  "Riley Chen",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Drew Martin",
+    "ReportSubmission":  {
+                             "authorName":  "Riley Chen",
+                             "generalOverview":  "## Submitted overview\n\nThe Fire Performance Safety Team team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                             "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                             "resources":  "",
+                             "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                             "improvements":  ""
+                         },
+    "ReportDraft":  {
+                        "authorName":  "Riley Chen",
+                        "generalOverview":  "## Draft overview\n\nThe Fire Performance Safety Team team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "",
+                        "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                        "improvements":  ""
+                    },
+    "ReportFinal":  {
+                        "authorName":  "Riley Chen",
+                        "generalOverview":  "## Final overview\n\nThe Fire Performance Safety Team team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "",
+                        "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                        "improvements":  ""
+                    },
+    "Status":  "ReportFinal",
+    "LastModified":  "2026-04-08T15:28:00+12:00"
+}

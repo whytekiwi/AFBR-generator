@@ -1,0 +1,23 @@
+﻿{
+    "Team":  "Web Content",
+    "Department":  "Communications",
+    "AuthorName":  "Casey Lee",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Blake Kim",
+    "ReportSubmission":  {
+
+                         },
+    "ReportDraft":  {
+                        "authorName":  "Casey Lee",
+                        "generalOverview":  "## Draft overview\n\nThe Web Content team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "",
+                        "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                        "improvements":  ""
+                    },
+    "ReportFinal":  {
+
+                    },
+    "Status":  "ReportDraft",
+    "LastModified":  "2026-04-22T15:28:00+12:00"
+}

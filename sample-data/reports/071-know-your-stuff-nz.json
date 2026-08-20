@@ -1,0 +1,28 @@
+﻿{
+    "Team":  "Know Your Stuff NZ",
+    "Department":  "Wellbeing",
+    "AuthorName":  "Alex Morgan",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Charlie Singh",
+    "ReportSubmission":  {
+                             "authorName":  "Alex Morgan",
+                             "generalOverview":  "## Submitted overview\n\nThe Know Your Stuff NZ team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                             "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                             "resources":  "The team had the core tools required to deliver its responsibilities.",
+                             "budgetAnalysis":  "",
+                             "improvements":  ""
+                         },
+    "ReportDraft":  {
+                        "authorName":  "Alex Morgan",
+                        "generalOverview":  "## Draft overview\n\nThe Know Your Stuff NZ team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "The team had the core tools required to deliver its responsibilities.",
+                        "budgetAnalysis":  "",
+                        "improvements":  ""
+                    },
+    "ReportFinal":  {
+
+                    },
+    "Status":  "ReportSubmission",
+    "LastModified":  "2026-04-15T15:28:00+12:00"
+}

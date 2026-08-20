@@ -1,0 +1,33 @@
+﻿{
+    "Team":  "Resource Consents",
+    "Department":  "Governance",
+    "AuthorName":  "Riley Chen",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Drew Martin",
+    "ReportSubmission":  {
+                             "authorName":  "Riley Chen",
+                             "generalOverview":  "## Submitted overview\n\nThe Resource Consents team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                             "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                             "resources":  "The team had the core tools required to deliver its responsibilities.",
+                             "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                             "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                         },
+    "ReportDraft":  {
+                        "authorName":  "Riley Chen",
+                        "generalOverview":  "## Draft overview\n\nThe Resource Consents team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "The team had the core tools required to deliver its responsibilities.",
+                        "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                        "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                    },
+    "ReportFinal":  {
+                        "authorName":  "Riley Chen",
+                        "generalOverview":  "## Final overview\n\nThe Resource Consents team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "The team had the core tools required to deliver its responsibilities.",
+                        "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                        "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                    },
+    "Status":  "ReportFinal",
+    "LastModified":  "2026-04-16T15:28:00+12:00"
+}

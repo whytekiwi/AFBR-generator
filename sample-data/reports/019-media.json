@@ -1,0 +1,28 @@
+﻿{
+    "Team":  "Media",
+    "Department":  "Communications",
+    "AuthorName":  "Riley Chen",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Charlie Singh",
+    "ReportSubmission":  {
+                             "authorName":  "Riley Chen",
+                             "generalOverview":  "## Submitted overview\n\nThe Media team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                             "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                             "resources":  "",
+                             "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                             "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                         },
+    "ReportDraft":  {
+                        "authorName":  "Riley Chen",
+                        "generalOverview":  "## Draft overview\n\nThe Media team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "",
+                        "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                        "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                    },
+    "ReportFinal":  {
+
+                    },
+    "Status":  "ReportSubmission",
+    "LastModified":  "2026-04-19T15:28:00+12:00"
+}

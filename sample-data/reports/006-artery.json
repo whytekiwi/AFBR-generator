@@ -1,0 +1,23 @@
+﻿{
+    "Team":  "ARTery",
+    "Department":  "Arts",
+    "AuthorName":  "Alex Morgan",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Blake Kim",
+    "ReportSubmission":  {
+
+                         },
+    "ReportDraft":  {
+                        "authorName":  "Alex Morgan",
+                        "generalOverview":  "## Draft overview\n\nThe ARTery team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "The team had the core tools required to deliver its responsibilities.",
+                        "budgetAnalysis":  "",
+                        "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                    },
+    "ReportFinal":  {
+
+                    },
+    "Status":  "ReportDraft",
+    "LastModified":  "2026-04-06T15:28:00+12:00"
+}

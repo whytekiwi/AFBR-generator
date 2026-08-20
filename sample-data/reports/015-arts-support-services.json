@@ -1,0 +1,28 @@
+﻿{
+    "Team":  "Arts Support Services",
+    "Department":  "Arts",
+    "AuthorName":  "Sam Taylor",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Charlie Singh",
+    "ReportSubmission":  {
+                             "authorName":  "Sam Taylor",
+                             "generalOverview":  "## Submitted overview\n\nThe Arts Support Services team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                             "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                             "resources":  "The team had the core tools required to deliver its responsibilities.",
+                             "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                             "improvements":  ""
+                         },
+    "ReportDraft":  {
+                        "authorName":  "Sam Taylor",
+                        "generalOverview":  "## Draft overview\n\nThe Arts Support Services team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "The team had the core tools required to deliver its responsibilities.",
+                        "budgetAnalysis":  "Budget tracking was reviewed monthly; next cycle should confirm commitments earlier.",
+                        "improvements":  ""
+                    },
+    "ReportFinal":  {
+
+                    },
+    "Status":  "ReportSubmission",
+    "LastModified":  "2026-04-15T15:28:00+12:00"
+}

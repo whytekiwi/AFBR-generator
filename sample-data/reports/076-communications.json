@@ -1,0 +1,33 @@
+﻿{
+    "Team":  "Communications",
+    "Department":  "Excom",
+    "AuthorName":  "Alex Morgan",
+    "ReviewerRole":  "Department Lead",
+    "ReviewerName":  "Drew Martin",
+    "ReportSubmission":  {
+                             "authorName":  "Alex Morgan",
+                             "generalOverview":  "## Submitted overview\n\nThe Communications team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                             "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                             "resources":  "",
+                             "budgetAnalysis":  "",
+                             "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                         },
+    "ReportDraft":  {
+                        "authorName":  "Alex Morgan",
+                        "generalOverview":  "## Draft overview\n\nThe Communications team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "",
+                        "budgetAnalysis":  "",
+                        "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                    },
+    "ReportFinal":  {
+                        "authorName":  "Alex Morgan",
+                        "generalOverview":  "## Final overview\n\nThe Communications team supported the 2026 Kiwiburn cycle with clear priorities and regular coordination.",
+                        "crewPerformance":  "- Crew onboarding was completed before the event.\n- Shift handovers improved during the final planning period.",
+                        "resources":  "",
+                        "budgetAnalysis":  "",
+                        "improvements":  "1. Confirm volunteer roles earlier.\n2. Publish the operating checklist before onsite setup."
+                    },
+    "Status":  "ReportFinal",
+    "LastModified":  "2026-04-20T15:28:00+12:00"
+}

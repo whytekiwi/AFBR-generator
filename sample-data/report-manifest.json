@@ -1,0 +1,566 @@
+﻿{
+    "document":  {
+                     "title":  "Kiwiburn 2026 Afterburn Report",
+                     "cycle":  "2026",
+                     "draft":  {
+                                   "enabled":  true,
+                                   "watermarkText":  "DRAFT"
+                               },
+                     "branding":  {
+                                      "coverArt":  null,
+                                      "logo":  null
+                                  }
+                 },
+    "frontMatter":  {
+                        "regionalRepresentatives":  {
+                                                        "title":  "A word from our Regional Burning Man Representatives",
+                                                        "status":  "placeholder"
+                                                    },
+                        "chairsReport":  {
+                                             "title":  "Chair\u0027s Report",
+                                             "status":  "placeholder"
+                                         },
+                        "welcomeAndLeadership":  {
+                                                     "status":  "hardcoded-placeholder",
+                                                     "pageCount":  2
+                                                 }
+                    },
+    "departments":  [
+                        {
+                            "id":  "admin",
+                            "name":  "Admin",
+                            "teams":  [
+                                          {
+                                              "id":  "001-backburners",
+                                              "name":  "Backburners",
+                                              "reportFile":  "reports/001-backburners.json"
+                                          },
+                                          {
+                                              "id":  "002-it-team",
+                                              "name":  "IT Team",
+                                              "reportFile":  "reports/002-it-team.json"
+                                          },
+                                          {
+                                              "id":  "003-process-mapper",
+                                              "name":  "Process Mapper",
+                                              "reportFile":  "reports/003-process-mapper.json"
+                                          },
+                                          {
+                                              "id":  "004-admin-team",
+                                              "name":  "Admin Team",
+                                              "reportFile":  "reports/004-admin-team.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "arts",
+                            "name":  "Arts",
+                            "teams":  [
+                                          {
+                                              "id":  "005-art-registration",
+                                              "name":  "Art Registration",
+                                              "reportFile":  "reports/005-art-registration.json"
+                                          },
+                                          {
+                                              "id":  "006-artery",
+                                              "name":  "ARTery",
+                                              "reportFile":  "reports/006-artery.json"
+                                          },
+                                          {
+                                              "id":  "007-burnable-arts",
+                                              "name":  "Burnable Arts",
+                                              "reportFile":  "reports/007-burnable-arts.json"
+                                          },
+                                          {
+                                              "id":  "008-centre-camp",
+                                              "name":  "Centre Camp",
+                                              "reportFile":  "reports/008-centre-camp.json"
+                                          },
+                                          {
+                                              "id":  "009-effigy",
+                                              "name":  "Effigy",
+                                              "reportFile":  "reports/009-effigy.json"
+                                          },
+                                          {
+                                              "id":  "010-engineers-art",
+                                              "name":  "Engineers (Art)",
+                                              "reportFile":  "reports/010-engineers-art.json"
+                                          },
+                                          {
+                                              "id":  "011-kac-kiwiburn-arts-committee",
+                                              "name":  "KAC (Kiwiburn Arts Committee)",
+                                              "reportFile":  "reports/011-kac-kiwiburn-arts-committee.json"
+                                          },
+                                          {
+                                              "id":  "012-mutant-vehicles",
+                                              "name":  "Mutant Vehicles",
+                                              "reportFile":  "reports/012-mutant-vehicles.json"
+                                          },
+                                          {
+                                              "id":  "013-temple",
+                                              "name":  "Temple",
+                                              "reportFile":  "reports/013-temple.json"
+                                          },
+                                          {
+                                              "id":  "014-burnable-art-build-coordinator",
+                                              "name":  "Burnable Art Build Coordinator",
+                                              "reportFile":  "reports/014-burnable-art-build-coordinator.json"
+                                          },
+                                          {
+                                              "id":  "015-arts-support-services",
+                                              "name":  "Arts Support Services",
+                                              "reportFile":  "reports/015-arts-support-services.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "communications",
+                            "name":  "Communications",
+                            "teams":  [
+                                          {
+                                              "id":  "016-blog",
+                                              "name":  "Blog",
+                                              "reportFile":  "reports/016-blog.json"
+                                          },
+                                          {
+                                              "id":  "017-design",
+                                              "name":  "Design",
+                                              "reportFile":  "reports/017-design.json"
+                                          },
+                                          {
+                                              "id":  "018-efp-electric-fencepost",
+                                              "name":  "EFP (Electric Fencepost)",
+                                              "reportFile":  "reports/018-efp-electric-fencepost.json"
+                                          },
+                                          {
+                                              "id":  "019-media",
+                                              "name":  "Media",
+                                              "reportFile":  "reports/019-media.json"
+                                          },
+                                          {
+                                              "id":  "020-photography",
+                                              "name":  "Photography",
+                                              "reportFile":  "reports/020-photography.json"
+                                          },
+                                          {
+                                              "id":  "021-social-media",
+                                              "name":  "Social Media",
+                                              "reportFile":  "reports/021-social-media.json"
+                                          },
+                                          {
+                                              "id":  "022-web-content",
+                                              "name":  "Web Content",
+                                              "reportFile":  "reports/022-web-content.json"
+                                          },
+                                          {
+                                              "id":  "023-burning-man-regional-contacts",
+                                              "name":  "Burning Man Regional Contacts",
+                                              "reportFile":  "reports/023-burning-man-regional-contacts.json"
+                                          },
+                                          {
+                                              "id":  "024-internal-comms",
+                                              "name":  "Internal Comms",
+                                              "reportFile":  "reports/024-internal-comms.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "community",
+                            "name":  "Community",
+                            "teams":  [
+                                          {
+                                              "id":  "025-accessibility",
+                                              "name":  "Accessibility",
+                                              "reportFile":  "reports/025-accessibility.json"
+                                          },
+                                          {
+                                              "id":  "026-consent-culture",
+                                              "name":  "Consent Culture",
+                                              "reportFile":  "reports/026-consent-culture.json"
+                                          },
+                                          {
+                                              "id":  "027-cultural-safety",
+                                              "name":  "Cultural Safety",
+                                              "reportFile":  "reports/027-cultural-safety.json"
+                                          },
+                                          {
+                                              "id":  "028-rainbow",
+                                              "name":  "Rainbow",
+                                              "reportFile":  "reports/028-rainbow.json"
+                                          },
+                                          {
+                                              "id":  "029-community-survey-team",
+                                              "name":  "Community Survey Team",
+                                              "reportFile":  "reports/029-community-survey-team.json"
+                                          },
+                                          {
+                                              "id":  "030-communiteam",
+                                              "name":  "CommuniTeam",
+                                              "reportFile":  "reports/030-communiteam.json"
+                                          },
+                                          {
+                                              "id":  "031-new-kiwiburners-team",
+                                              "name":  "New Kiwiburners Team",
+                                              "reportFile":  "reports/031-new-kiwiburners-team.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "conduct-committee",
+                            "name":  "Conduct Committee",
+                            "teams":  [
+                                          {
+                                              "id":  "032-conduct-committee",
+                                              "name":  "Conduct Committee",
+                                              "reportFile":  "reports/032-conduct-committee.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "crew",
+                            "name":  "Crew",
+                            "teams":  [
+                                          {
+                                              "id":  "033-crew-assistance",
+                                              "name":  "Crew Assistance",
+                                              "reportFile":  "reports/033-crew-assistance.json"
+                                          },
+                                          {
+                                              "id":  "034-crew-policies",
+                                              "name":  "Crew Policies",
+                                              "reportFile":  "reports/034-crew-policies.json"
+                                          },
+                                          {
+                                              "id":  "035-kitchen",
+                                              "name":  "Kitchen",
+                                              "reportFile":  "reports/035-kitchen.json"
+                                          },
+                                          {
+                                              "id":  "036-onsite-crew-support",
+                                              "name":  "Onsite Crew Support",
+                                              "reportFile":  "reports/036-onsite-crew-support.json"
+                                          },
+                                          {
+                                              "id":  "037-swag",
+                                              "name":  "Swag",
+                                              "reportFile":  "reports/037-swag.json"
+                                          },
+                                          {
+                                              "id":  "038-training",
+                                              "name":  "Training",
+                                              "reportFile":  "reports/038-training.json"
+                                          },
+                                          {
+                                              "id":  "039-volunteers",
+                                              "name":  "Volunteers",
+                                              "reportFile":  "reports/039-volunteers.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "finance",
+                            "name":  "Finance",
+                            "teams":  [
+                                          {
+                                              "id":  "040-finance",
+                                              "name":  "Finance",
+                                              "reportFile":  "reports/040-finance.json"
+                                          },
+                                          {
+                                              "id":  "041-purchasing",
+                                              "name":  "Purchasing",
+                                              "reportFile":  "reports/041-purchasing.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "governance",
+                            "name":  "Governance",
+                            "teams":  [
+                                          {
+                                              "id":  "042-depot",
+                                              "name":  "Depot",
+                                              "reportFile":  "reports/042-depot.json"
+                                          },
+                                          {
+                                              "id":  "043-event-delivery",
+                                              "name":  "Event Delivery",
+                                              "reportFile":  "reports/043-event-delivery.json"
+                                          },
+                                          {
+                                              "id":  "044-resource-consents",
+                                              "name":  "Resource Consents",
+                                              "reportFile":  "reports/044-resource-consents.json"
+                                          },
+                                          {
+                                              "id":  "045-security",
+                                              "name":  "Security",
+                                              "reportFile":  "reports/045-security.json"
+                                          },
+                                          {
+                                              "id":  "046-site-management",
+                                              "name":  "Site Management",
+                                              "reportFile":  "reports/046-site-management.json"
+                                          },
+                                          {
+                                              "id":  "047-site-office",
+                                              "name":  "Site Office",
+                                              "reportFile":  "reports/047-site-office.json"
+                                          },
+                                          {
+                                              "id":  "048-sustainability",
+                                              "name":  "Sustainability",
+                                              "reportFile":  "reports/048-sustainability.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "infrastructure",
+                            "name":  "Infrastructure",
+                            "teams":  [
+                                          {
+                                              "id":  "049-leave-no-trace",
+                                              "name":  "Leave No Trace",
+                                              "reportFile":  "reports/049-leave-no-trace.json"
+                                          },
+                                          {
+                                              "id":  "050-mpw-ministry-of-public-works",
+                                              "name":  "MPW (Ministry of Public Works)",
+                                              "reportFile":  "reports/050-mpw-ministry-of-public-works.json"
+                                          },
+                                          {
+                                              "id":  "051-sanitation",
+                                              "name":  "Sanitation",
+                                              "reportFile":  "reports/051-sanitation.json"
+                                          },
+                                          {
+                                              "id":  "052-surveying",
+                                              "name":  "Surveying",
+                                              "reportFile":  "reports/052-surveying.json"
+                                          },
+                                          {
+                                              "id":  "053-town-planning",
+                                              "name":  "Town Planning",
+                                              "reportFile":  "reports/053-town-planning.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "services",
+                            "name":  "Services",
+                            "teams":  [
+                                          {
+                                              "id":  "054-gate",
+                                              "name":  "Gate",
+                                              "reportFile":  "reports/054-gate.json"
+                                          },
+                                          {
+                                              "id":  "055-greeters",
+                                              "name":  "Greeters",
+                                              "reportFile":  "reports/055-greeters.json"
+                                          },
+                                          {
+                                              "id":  "056-parking",
+                                              "name":  "Parking",
+                                              "reportFile":  "reports/056-parking.json"
+                                          },
+                                          {
+                                              "id":  "057-ticketing",
+                                              "name":  "Ticketing",
+                                              "reportFile":  "reports/057-ticketing.json"
+                                          },
+                                          {
+                                              "id":  "058-traffic",
+                                              "name":  "Traffic",
+                                              "reportFile":  "reports/058-traffic.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "site-safety",
+                            "name":  "Site Safety",
+                            "teams":  [
+                                          {
+                                              "id":  "059-fast-fire-arts-and-safety-team",
+                                              "name":  "FAST (Fire Arts and Safety Team)",
+                                              "reportFile":  "reports/059-fast-fire-arts-and-safety-team.json"
+                                          },
+                                          {
+                                              "id":  "060-fire-emergency-nz-fenz",
+                                              "name":  "Fire \u0026 Emergency NZ (FENZ)",
+                                              "reportFile":  "reports/060-fire-emergency-nz-fenz.json"
+                                          },
+                                          {
+                                              "id":  "061-external-health-safety",
+                                              "name":  "External Health \u0026 Safety",
+                                              "reportFile":  "reports/061-external-health-safety.json"
+                                          },
+                                          {
+                                              "id":  "062-perimeter",
+                                              "name":  "Perimeter",
+                                              "reportFile":  "reports/062-perimeter.json"
+                                          },
+                                          {
+                                              "id":  "063-internal-health-safety",
+                                              "name":  "Internal Health \u0026 Safety",
+                                              "reportFile":  "reports/063-internal-health-safety.json"
+                                          },
+                                          {
+                                              "id":  "064-fire-performance-safety-team",
+                                              "name":  "Fire Performance Safety Team",
+                                              "reportFile":  "reports/064-fire-performance-safety-team.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "theme-camps",
+                            "name":  "Theme Camps",
+                            "teams":  [
+                                          {
+                                              "id":  "065-event-registration",
+                                              "name":  "Event Registration",
+                                              "reportFile":  "reports/065-event-registration.json"
+                                          },
+                                          {
+                                              "id":  "066-sound",
+                                              "name":  "Sound",
+                                              "reportFile":  "reports/066-sound.json"
+                                          },
+                                          {
+                                              "id":  "067-theme-camps",
+                                              "name":  "Theme Camps",
+                                              "reportFile":  "reports/067-theme-camps.json"
+                                          },
+                                          {
+                                              "id":  "068-theme-camp-engagement-and-appreciation-squad",
+                                              "name":  "Theme-Camp Engagement and Appreciation Squad",
+                                              "reportFile":  "reports/068-theme-camp-engagement-and-appreciation-squad.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "wellbeing",
+                            "name":  "Wellbeing",
+                            "teams":  [
+                                          {
+                                              "id":  "069-black-sheep-rangers",
+                                              "name":  "Black Sheep Rangers",
+                                              "reportFile":  "reports/069-black-sheep-rangers.json"
+                                          },
+                                          {
+                                              "id":  "070-consent-club",
+                                              "name":  "Consent Club",
+                                              "reportFile":  "reports/070-consent-club.json"
+                                          },
+                                          {
+                                              "id":  "071-know-your-stuff-nz",
+                                              "name":  "Know Your Stuff NZ",
+                                              "reportFile":  "reports/071-know-your-stuff-nz.json"
+                                          },
+                                          {
+                                              "id":  "072-medics",
+                                              "name":  "Medics",
+                                              "reportFile":  "reports/072-medics.json"
+                                          },
+                                          {
+                                              "id":  "073-sanctuary",
+                                              "name":  "Sanctuary",
+                                              "reportFile":  "reports/073-sanctuary.json"
+                                          }
+                                      ]
+                        },
+                        {
+                            "id":  "excom",
+                            "name":  "Excom",
+                            "teams":  [
+                                          {
+                                              "id":  "074-admin",
+                                              "name":  "Admin",
+                                              "reportFile":  "reports/074-admin.json"
+                                          },
+                                          {
+                                              "id":  "075-arts",
+                                              "name":  "Arts",
+                                              "reportFile":  "reports/075-arts.json"
+                                          },
+                                          {
+                                              "id":  "076-communications",
+                                              "name":  "Communications",
+                                              "reportFile":  "reports/076-communications.json"
+                                          },
+                                          {
+                                              "id":  "077-community",
+                                              "name":  "Community",
+                                              "reportFile":  "reports/077-community.json"
+                                          },
+                                          {
+                                              "id":  "078-community-2ic",
+                                              "name":  "Community 2IC",
+                                              "reportFile":  "reports/078-community-2ic.json"
+                                          },
+                                          {
+                                              "id":  "079-crew",
+                                              "name":  "Crew",
+                                              "reportFile":  "reports/079-crew.json"
+                                          },
+                                          {
+                                              "id":  "080-finance",
+                                              "name":  "Finance",
+                                              "reportFile":  "reports/080-finance.json"
+                                          },
+                                          {
+                                              "id":  "081-chair",
+                                              "name":  "Chair",
+                                              "reportFile":  "reports/081-chair.json"
+                                          },
+                                          {
+                                              "id":  "082-infrastructure",
+                                              "name":  "Infrastructure",
+                                              "reportFile":  "reports/082-infrastructure.json"
+                                          },
+                                          {
+                                              "id":  "083-services",
+                                              "name":  "Services",
+                                              "reportFile":  "reports/083-services.json"
+                                          },
+                                          {
+                                              "id":  "084-services",
+                                              "name":  "Services",
+                                              "reportFile":  "reports/084-services.json"
+                                          },
+                                          {
+                                              "id":  "085-site-safety",
+                                              "name":  "Site Safety",
+                                              "reportFile":  "reports/085-site-safety.json"
+                                          },
+                                          {
+                                              "id":  "086-theme-camps",
+                                              "name":  "Theme Camps",
+                                              "reportFile":  "reports/086-theme-camps.json"
+                                          },
+                                          {
+                                              "id":  "087-theme-camps-2ic",
+                                              "name":  "Theme Camps 2IC",
+                                              "reportFile":  "reports/087-theme-camps-2ic.json"
+                                          },
+                                          {
+                                              "id":  "088-wellbeing",
+                                              "name":  "Wellbeing",
+                                              "reportFile":  "reports/088-wellbeing.json"
+                                          },
+                                          {
+                                              "id":  "089-wellbeing-2ic",
+                                              "name":  "Wellbeing 2IC",
+                                              "reportFile":  "reports/089-wellbeing-2ic.json"
+                                          }
+                                      ]
+                        }
+                    ],
+    "financials":  {
+                       "title":  "Financials",
+                       "status":  "placeholder",
+                       "images":  [
+
+                                  ]
+                   }
+}
