@@ -7,10 +7,15 @@
     "node": ">=22"
   },
   "scripts": {
+    "api:start": "npm --prefix api start",
+    "migrate": "node scripts/migrate-reports.js",
     "render": "node src/cli.js",
-    "test": "node --test"
+    "test": "node --test",
+    "web:build": "npm --prefix web run build",
+    "web:dev": "npm --prefix web run dev"
   },
   "dependencies": {
+    "gray-matter": "^4.0.3",
     "pdf-lib": "^1.17.1",
     "playwright": "^1.54.0"
   }
