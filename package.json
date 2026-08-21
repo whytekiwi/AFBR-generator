@@ -9,13 +9,14 @@
   "scripts": {
     "api:start": "npm --prefix api start",
     "migrate": "node scripts/migrate-reports.js",
+    "migrate:blob": "node scripts/migrate-reports-to-blob.js",
     "render": "node src/cli.js",
     "test": "node --test",
     "web:build": "npm --prefix web run build",
     "web:dev": "npm --prefix web run dev"
   },
   "dependencies": {
-    "@azure/storage-blob": "^12.28.0",
+    "@azure/storage-blob": "12.28.0",
     "gray-matter": "^4.0.3",
     "pdf-lib": "^1.17.1",
     "playwright": "^1.54.0"

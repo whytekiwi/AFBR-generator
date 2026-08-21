@@ -205,7 +205,7 @@ export class BlobDocumentStore {
     return this.get();
   }
 
-  async uploadMedia({ bytes, contentType, fileName }) {
+  async uploadMedia({ bytes, contentType, fileName, id: requestedId }) {
     const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
     const normalizedContentType = IMAGE_TYPES.has(contentType)
       ? contentType
@@ -215,7 +215,8 @@ export class BlobDocumentStore {
       throw new Error('Images must be between 1 byte and 10 MB');
     }
     await this.ensureContainer();
-    const id = randomUUID();
+    const id = requestedId ?? randomUUID();
+    if (!MEDIA_ID_PATTERN.test(id)) throw new Error('Invalid media id');
     await this.container.getBlockBlobClient(`media/${id}`).upload(bytes, bytes.length, {
       blobHTTPHeaders: { blobContentType: normalizedContentType },
       metadata: {

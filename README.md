@@ -57,6 +57,22 @@ Each Markdown file contains identity fields in YAML front matter and the five
 report sections as fixed level-two headings. The migrated directory remains a
 valid input to the PDF renderer.
 
+To migrate the raw JSON reports directly into Blob Storage, set the storage
+connection and run:
+
+```powershell
+$env:AZURE_STORAGE_CONNECTION_STRING = "UseDevelopmentStorage=true"
+npm run migrate:blob -- sample-data
+```
+
+The command uploads canonical Markdown reports and searchable metadata to
+`REPORTS_CONTAINER`, then uploads custom sections and media before publishing
+the ordered `manifest.json` to `DOCUMENT_CONTAINER`. Existing blobs with the
+same report IDs are replaced. Set `REPORTS_CONTAINER` and `DOCUMENT_CONTAINER`
+to target non-default containers. The script also accepts `--input`,
+`--reports-container`, `--document-container`, and `--connection-string` when
+invoked directly with Node.
+
 ## Render a PDF
 
 The renderer requires Node.js 22 and Playwright. Install its dependencies and
