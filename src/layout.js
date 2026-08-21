@@ -125,6 +125,34 @@ function createContentSectionUnits(section, blocks) {
   });
 }
 
+function frontMatterBody(section) {
+  return section?.body?.trim() ? section.body : 'Content will be supplied later.';
+}
+
+function createFrontMatterUnits(model, blocks) {
+  if (model.outline || !model.frontMatter) return { regionalRepresentatives: [], chairsReport: [] };
+
+  return {
+    regionalRepresentatives: createContentSectionUnits(
+      {
+        id: 'front-matter:regional-representatives',
+        title: model.frontMatter.regionalRepresentatives?.title
+          ?? 'A word from our Regional Burning Man Representatives',
+        body: frontMatterBody(model.frontMatter.regionalRepresentatives),
+      },
+      blocks,
+    ),
+    chairsReport: createContentSectionUnits(
+      {
+        id: 'front-matter:chairs-report',
+        title: model.frontMatter.chairsReport?.title ?? "Chair's Report",
+        body: frontMatterBody(model.frontMatter.chairsReport),
+      },
+      blocks,
+    ),
+  };
+}
+
 export function createLayoutBlocks(model) {
   const blocks = {};
   const departmentUnits = new Map(
@@ -142,8 +170,9 @@ export function createLayoutBlocks(model) {
       .filter(({ type }) => type === 'section')
       .map((section) => [section.id, createContentSectionUnits(section, blocks)]),
   );
+  const frontMatterUnits = createFrontMatterUnits(model, blocks);
 
-  return { blocks, contentSectionUnits, departmentUnits, teamUnits };
+  return { blocks, contentSectionUnits, departmentUnits, frontMatterUnits, teamUnits };
 }
 
 function unitHeight(unit, measurements) {
@@ -170,27 +199,43 @@ function fillVirtualPage(units, measurements, capacity) {
   return { units: pageUnits, used };
 }
 
-function createFrontMatterSpreads(model) {
-  return [
-    {
-      type: 'front-matter',
-      slots: [
-        { type: 'placeholder', section: model.frontMatter.regionalRepresentatives },
-        { type: 'contents' },
-      ],
-    },
-    {
-      type: 'front-matter',
-      slots: [
-        { type: 'placeholder', section: model.frontMatter.chairsReport },
-        { type: 'welcome', pageIndex: 1 },
-      ],
-    },
-    {
-      type: 'front-matter',
-      slots: [{ type: 'welcome', pageIndex: 2 }, { type: 'blank' }],
-    },
+function welcomeVirtualPages(section) {
+  const pageCount = section?.pageCount ?? 2;
+  return Array.from({ length: pageCount }, (_, index) => ({
+    type: 'welcome',
+    pageIndex: index + 1,
+    pageCount,
+  }));
+}
+
+function paginateFrontMatterUnits(units, measurements) {
+  const remaining = units.map((unit) => ({ ...unit, blockIds: [...unit.blockIds] }));
+  const pages = [];
+  while (remaining.length > 0) {
+    const page = fillVirtualPage(remaining, measurements, BOOKLET_LAYOUT.continuationContentHeight);
+    pages.push({ type: 'content', units: page.units });
+  }
+  return pages;
+}
+
+// Front-matter elements only ever break on their own virtual-page boundaries;
+// two consecutive virtual pages are then packed onto each physical page.
+function createFrontMatterSpreads(model, frontMatterUnits, measurements) {
+  const virtualPages = [
+    ...paginateFrontMatterUnits(frontMatterUnits.regionalRepresentatives, measurements),
+    { type: 'contents' },
+    ...paginateFrontMatterUnits(frontMatterUnits.chairsReport, measurements),
+    ...welcomeVirtualPages(model.frontMatter.welcomeAndLeadership),
   ];
+
+  const spreads = [];
+  for (let index = 0; index < virtualPages.length; index += 2) {
+    spreads.push({
+      type: 'front-matter',
+      slots: [virtualPages[index], virtualPages[index + 1] ?? { type: 'blank' }],
+    });
+  }
+  return spreads;
 }
 
 export function createSpreadPlan(model, measurements) {
@@ -198,6 +243,7 @@ export function createSpreadPlan(model, measurements) {
     blocks,
     contentSectionUnits,
     departmentUnits,
+    frontMatterUnits,
     teamUnits,
   } = createLayoutBlocks(model);
   if (model.outline) {
@@ -206,6 +252,29 @@ export function createSpreadPlan(model, measurements) {
       ...unit,
       blockIds: [...unit.blockIds],
     }));
+
+    // Front-matter items (contents + sections) only break on their own virtual-page
+    // boundaries; two consecutive virtual pages are then packed onto each physical page.
+    let frontMatterQueue = [];
+    const paginateSection = (section) => {
+      const units = copyUnits(contentSectionUnits.get(section.id));
+      const pages = [];
+      while (units.length > 0) {
+        const page = fillVirtualPage(units, measurements, BOOKLET_LAYOUT.continuationContentHeight);
+        pages.push({ type: 'content', section, units: page.units });
+      }
+      return pages;
+    };
+    const flushFrontMatter = () => {
+      for (let index = 0; index < frontMatterQueue.length; index += 2) {
+        spreads.push({
+          type: 'front-matter',
+          slots: [frontMatterQueue[index], frontMatterQueue[index + 1] ?? { type: 'blank' }],
+        });
+      }
+      frontMatterQueue = [];
+    };
+
     const appendUnits = (units, createSpread, firstCapacity = BOOKLET_LAYOUT.continuationContentHeight) => {
       let first = true;
       while (units.length > 0) {
@@ -219,18 +288,14 @@ export function createSpreadPlan(model, measurements) {
 
     for (const item of model.outline) {
       if (item.type === 'contents') {
-        spreads.push({
-          type: 'front-matter',
-          slots: [{ type: 'contents' }, { type: 'blank' }],
-        });
+        frontMatterQueue.push({ type: 'contents' });
       } else if (item.type === 'section') {
-        appendUnits(
-          copyUnits(contentSectionUnits.get(item.id)),
-          (slots) => ({ type: 'content-section', section: item, slots }),
-        );
+        frontMatterQueue.push(...paginateSection(item));
       } else if (item.type === 'image') {
+        flushFrontMatter();
         spreads.push({ type: 'image-insert', insert: item });
       } else if (item.type === 'department') {
+        flushFrontMatter();
         let isDepartmentStart = true;
         let pending = [];
         const flush = () => {
@@ -269,12 +334,15 @@ export function createSpreadPlan(model, measurements) {
         flush();
       }
     }
+    flushFrontMatter();
 
     const pageNumbers = {};
     spreads.forEach((spread, index) => {
       spread.pdfPageNumber = BOOKLET_LAYOUT.coverPages + index + 1;
-      if (spread.section && pageNumbers[spread.section.id] === undefined) {
-        pageNumbers[spread.section.id] = spread.pdfPageNumber;
+      for (const slot of spread.slots ?? []) {
+        if (slot.section && pageNumbers[slot.section.id] === undefined) {
+          pageNumbers[slot.section.id] = spread.pdfPageNumber;
+        }
       }
       if (spread.department && pageNumbers[spread.department.id] === undefined) {
         pageNumbers[spread.department.id] = spread.pdfPageNumber;
@@ -283,7 +351,7 @@ export function createSpreadPlan(model, measurements) {
     return { blocks, pageNumbers, spreads };
   }
 
-  const spreads = createFrontMatterSpreads(model);
+  const spreads = createFrontMatterSpreads(model, frontMatterUnits, measurements);
 
   for (const department of model.departments) {
     const units = departmentUnits.get(department.id).map((unit) => ({

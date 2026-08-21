@@ -122,7 +122,6 @@ test('uses the normalized outline order for sections, departments, and images', 
   assert.deepEqual(
     plan.spreads.map(({ type }) => type),
     [
-      'content-section',
       'front-matter',
       'department-start',
       'image-insert',
@@ -130,5 +129,5 @@ test('uses the normalized outline order for sections, departments, and images', 
     ],
   );
   assert.equal(plan.pageNumbers.welcome, 2);
-  assert.equal(plan.pageNumbers.admin, 4);
+  assert.equal(plan.pageNumbers.admin, 3);
 });

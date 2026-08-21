@@ -116,8 +116,6 @@ function renderFrontSlot(slot, model, pageNumbers) {
   switch (slot.type) {
     case 'contents':
       return `<p class="eyebrow">Navigation</p><h2>Contents</h2><ol class="contents-list">${model.tableOfContents.map(({ id, name }) => `<li><span>${escapeHtml(name)}</span><span>${pageNumbers[id] ?? ''}</span></li>`).join('')}</ol>`;
-    case 'placeholder':
-      return `<p class="eyebrow">Front matter</p><h2>${escapeHtml(slot.section?.title ?? 'Placeholder')}</h2><p>Content will be supplied later.</p>`;
     case 'welcome':
       return `<p class="eyebrow">Front matter</p><h2>Welcome and leadership structure</h2><p>Fixed content will be supplied later.</p>${slot.pageIndex === 2 ? '<p>This second page is reserved for the leadership structure.</p>' : ''}`;
     case 'blank':
@@ -148,14 +146,12 @@ async function renderSpread(spread, model, plan) {
   }
 
   if (spread.type === 'front-matter') {
-    return `<section class="spread front-spread"><div class="spread-grid">${spread.slots.map((slot) => `<article class="booklet-page">${renderFrontSlot(slot, model, plan.pageNumbers)}</article>`).join('')}</div>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
-  }
-
-  if (spread.type === 'content-section') {
-    const pages = spread.slots.map(
-      (slot) => `<article class="booklet-page">${renderBlocks(slot.units, plan.blocks)}</article>`,
-    );
-    return `<section class="spread content-section-spread"><div class="spread-grid">${pages.join('')}</div>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
+    const pages = spread.slots.map((slot) => (
+      slot.type === 'content'
+        ? `<article class="booklet-page">${renderBlocks(slot.units, plan.blocks)}</article>`
+        : `<article class="booklet-page">${renderFrontSlot(slot, model, plan.pageNumbers)}</article>`
+    ));
+    return `<section class="spread front-spread"><div class="spread-grid">${pages.join('')}</div>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
   }
 
   const identity = departmentIdentity(spread.department);
