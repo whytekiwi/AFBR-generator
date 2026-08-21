@@ -66,6 +66,7 @@ const createImageItem = (media: UploadedMedia, seed: string): ImageItem => ({
   altText: '',
   caption: '',
   fullWidth: false,
+  fullPage: false,
 });
 
 const validateImageFile = (file: File): string | null => {
