@@ -96,6 +96,7 @@ function bodyStyles() {
     .content-section-heading h1 { color: #243b53; font-size: 22pt; line-height: 1.15; margin: 0; }
     .report-markdown { overflow-wrap: anywhere; padding-bottom: 3mm; text-align: justify; }
     .report-markdown:has(+ .report-markdown--continuation) { padding-bottom: 0; }
+    .report-markdown:has(+ .report-markdown--continuation) > :last-child { margin-bottom: 0; }
     .report-markdown:has(+ .report-markdown--continuation) ul,
     .report-markdown:has(+ .report-markdown--continuation) ol { margin-bottom: 0; }
     .report-markdown p { margin-bottom: 2.5mm; }

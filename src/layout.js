@@ -37,18 +37,24 @@ function splitMarkdownBlocks(markdown) {
   const blocks = [];
   let current = [];
 
+  const flush = () => {
+    if (current.length === 0) return;
+    // fragments beyond the first are continuations of the same source paragraph, split only to fit pagination
+    splitOversizedBlock(current.join('\n')).forEach((text, index) => {
+      blocks.push({ text, continuation: index > 0 });
+    });
+    current = [];
+  };
+
   for (const line of markdown.replace(/\r\n/g, '\n').split('\n')) {
     if (line.trim() === '') {
-      if (current.length > 0) {
-        blocks.push(...splitOversizedBlock(current.join('\n')));
-        current = [];
-      }
+      flush();
       continue;
     }
     current.push(line);
   }
 
-  if (current.length > 0) blocks.push(...splitOversizedBlock(current.join('\n')));
+  flush();
   return blocks;
 }
 
@@ -90,23 +96,29 @@ function createTeamUnits(team, blocks) {
 
   let isFirstUnit = true;
   for (const section of team.sections) {
-    const sectionHeadingId = addBlock(blocks, {
-      id: `team:${team.id}:section:${section.id}:heading`,
-      type: 'report-section-heading',
-      title: section.title,
-    });
-    const content = section.markdown.trim()
-      ? splitMarkdownBlocks(section.markdown)
-      : [null];
+    if (!section.markdown.trim()) continue; // empty sections are skipped entirely, not shown
 
-    content.forEach((markdown, index) => {
+    // generalOverview usually carries its own embedded heading, so it never gets a section label
+    const showHeading = section.id !== 'generalOverview';
+    const sectionHeadingId = showHeading
+      ? addBlock(blocks, {
+        id: `team:${team.id}:section:${section.id}:heading`,
+        type: 'report-section-heading',
+        title: section.title,
+      })
+      : null;
+    const content = splitMarkdownBlocks(section.markdown);
+
+    content.forEach(({ text: markdown, continuation }, index) => {
       const contentId = addBlock(blocks, {
         id: `team:${team.id}:section:${section.id}:content:${index}`,
-        type: markdown === null ? 'report-empty' : 'report-markdown',
+        type: 'report-markdown',
         markdown,
-        continuation: index > 0 && Boolean(markdown?.trimStart().match(/^[-*]\s+/)),
+        continuation,
       });
-      const blockIds = index === 0 ? [sectionHeadingId, contentId] : [contentId];
+      const blockIds = index === 0 && sectionHeadingId
+        ? [sectionHeadingId, contentId]
+        : [contentId];
       if (isFirstUnit) {
         blockIds.unshift(teamHeadingId);
         isFirstUnit = false;
@@ -116,6 +128,11 @@ function createTeamUnits(team, blocks) {
         blockIds,
       });
     });
+  }
+
+  if (isFirstUnit) {
+    // no populated sections at all: still show the team name/author with the "empty" toggle
+    units.push({ id: `team:${team.id}:heading-only`, blockIds: [teamHeadingId] });
   }
   return units;
 }
@@ -130,13 +147,13 @@ function createContentSectionUnits(section, blocks) {
     type: 'content-section-heading',
     title: section.title,
   });
-  const content = section.body.trim() ? splitMarkdownBlocks(section.body) : [null];
-  return content.map((markdown, index) => {
+  const content = section.body.trim() ? splitMarkdownBlocks(section.body) : [{ text: null, continuation: false }];
+  return content.map(({ text: markdown, continuation }, index) => {
     const contentId = addBlock(blocks, {
       id: `content:${section.id}:content:${index}`,
       type: markdown === null ? 'report-empty' : 'report-markdown',
       markdown,
-      continuation: index > 0 && Boolean(markdown?.trimStart().match(/^[-*]\s+/)),
+      continuation,
     });
     return {
       id: `content:${section.id}:${index}`,
@@ -200,7 +217,25 @@ function unitHeight(unit, measurements) {
   return unit.blockIds.reduce((height, id) => height + measurements[id], 0);
 }
 
-function fillVirtualPage(units, measurements, capacity) {
+// Fragments of an oversized paragraph that land together on the same virtual page are
+// rejoined into one block, so a mid-sentence split is only ever visible at a real page break.
+function mergeContinuations(pageUnits, blocks) {
+  const merged = [];
+  for (const unit of pageUnits) {
+    const block = unit.blockIds.length === 1 ? blocks[unit.blockIds[0]] : null;
+    const previousUnit = merged.at(-1);
+    const previousBlock = previousUnit ? blocks[previousUnit.blockIds.at(-1)] : null;
+
+    if (block?.type === 'report-markdown' && block.continuation && previousBlock?.type === 'report-markdown') {
+      previousBlock.markdown = `${previousBlock.markdown} ${block.markdown}`;
+      continue;
+    }
+    merged.push(unit);
+  }
+  return merged;
+}
+
+function fillVirtualPage(units, measurements, capacity, blocks) {
   const pageUnits = [];
   let used = 0;
 
@@ -217,7 +252,7 @@ function fillVirtualPage(units, measurements, capacity) {
     used += height;
   }
 
-  return { units: pageUnits, used };
+  return { units: mergeContinuations(pageUnits, blocks), used };
 }
 
 function welcomeVirtualPages(section) {
@@ -229,11 +264,11 @@ function welcomeVirtualPages(section) {
   }));
 }
 
-function paginateFrontMatterUnits(units, measurements) {
+function paginateFrontMatterUnits(units, measurements, blocks) {
   const remaining = units.map((unit) => ({ ...unit, blockIds: [...unit.blockIds] }));
   const pages = [];
   while (remaining.length > 0) {
-    const page = fillVirtualPage(remaining, measurements, BOOKLET_LAYOUT.continuationContentHeight);
+    const page = fillVirtualPage(remaining, measurements, BOOKLET_LAYOUT.continuationContentHeight, blocks);
     pages.push({ type: 'content', units: page.units });
   }
   return pages;
@@ -241,11 +276,11 @@ function paginateFrontMatterUnits(units, measurements) {
 
 // Front-matter elements only ever break on their own virtual-page boundaries;
 // two consecutive virtual pages are then packed onto each physical page.
-function createFrontMatterSpreads(model, frontMatterUnits, measurements) {
+function createFrontMatterSpreads(model, frontMatterUnits, measurements, blocks) {
   const virtualPages = [
-    ...paginateFrontMatterUnits(frontMatterUnits.regionalRepresentatives, measurements),
+    ...paginateFrontMatterUnits(frontMatterUnits.regionalRepresentatives, measurements, blocks),
     { type: 'contents' },
-    ...paginateFrontMatterUnits(frontMatterUnits.chairsReport, measurements),
+    ...paginateFrontMatterUnits(frontMatterUnits.chairsReport, measurements, blocks),
     ...welcomeVirtualPages(model.frontMatter.welcomeAndLeadership),
   ];
 
@@ -281,7 +316,7 @@ export function createSpreadPlan(model, measurements) {
       const units = copyUnits(contentSectionUnits.get(section.id));
       const pages = [];
       while (units.length > 0) {
-        const page = fillVirtualPage(units, measurements, BOOKLET_LAYOUT.continuationContentHeight);
+        const page = fillVirtualPage(units, measurements, BOOKLET_LAYOUT.continuationContentHeight, blocks);
         pages.push({ type: 'content', section, units: page.units });
       }
       return pages;
@@ -300,8 +335,8 @@ export function createSpreadPlan(model, measurements) {
       let first = true;
       while (units.length > 0) {
         const capacity = first ? firstCapacity : BOOKLET_LAYOUT.continuationContentHeight;
-        const left = fillVirtualPage(units, measurements, capacity);
-        const right = fillVirtualPage(units, measurements, capacity);
+        const left = fillVirtualPage(units, measurements, capacity, blocks);
+        const right = fillVirtualPage(units, measurements, capacity, blocks);
         spreads.push(createSpread([left, right], first));
         first = false;
       }
@@ -369,7 +404,7 @@ export function createSpreadPlan(model, measurements) {
     return { blocks, pageNumbers, spreads };
   }
 
-  const spreads = createFrontMatterSpreads(model, frontMatterUnits, measurements);
+  const spreads = createFrontMatterSpreads(model, frontMatterUnits, measurements, blocks);
 
   for (const department of model.departments) {
     const units = departmentUnits.get(department.id).map((unit) => ({
@@ -382,8 +417,8 @@ export function createSpreadPlan(model, measurements) {
       const capacity = isStart
         ? BOOKLET_LAYOUT.startContentHeight
         : BOOKLET_LAYOUT.continuationContentHeight;
-      const left = fillVirtualPage(units, measurements, capacity);
-      const right = fillVirtualPage(units, measurements, capacity);
+      const left = fillVirtualPage(units, measurements, capacity, blocks);
+      const right = fillVirtualPage(units, measurements, capacity, blocks);
 
       spreads.push({
         type: isStart ? 'department-start' : 'department-continuation',
