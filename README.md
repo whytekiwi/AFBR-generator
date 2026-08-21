@@ -73,6 +73,13 @@ to target non-default containers. The script also accepts `--input`,
 `--reports-container`, `--document-container`, and `--connection-string` when
 invoked directly with Node.
 
+Migration discovers report JSON recursively and uses each file's declared
+`Team` and `Department`; filenames and stale `reportFile` paths are ignored.
+Exact manifest identity matches retain their existing IDs and order. New or
+renamed identities receive deterministic IDs and content-based ordering.
+Duplicate identities, malformed JSON, and unrelated JSON files fail with the
+affected paths rather than being silently skipped.
+
 ## Render a PDF
 
 The renderer requires Node.js 22 and Playwright. Install its dependencies and
