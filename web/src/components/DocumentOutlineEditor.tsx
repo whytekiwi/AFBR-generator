@@ -36,7 +36,6 @@ type FilePickerButtonProps = {
   onSelect: (file: File) => void;
 };
 
-const maxImageBytes = 10 * 1024 * 1024;
 const acceptedImageTypes = '.png,.jpg,.jpeg,.gif,.webp,.svg';
 const allowedExtensions = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']);
 
@@ -66,13 +65,10 @@ const createImageItem = (media: UploadedMedia, seed: string): ImageItem => ({
   contentType: media.contentType,
   altText: '',
   caption: '',
+  fullWidth: false,
 });
 
 const validateImageFile = (file: File): string | null => {
-  if (file.size > maxImageBytes) {
-    return 'Images must be 10MB or smaller.';
-  }
-
   const normalizedType = file.type.toLowerCase();
   const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
   const isSupportedType =
@@ -613,7 +609,7 @@ export function DocumentOutlineEditor({
           </div>
 
         <p className="field-hint document-toolbar__hint">
-          Upload PNG, JPEG, GIF, WebP, or SVG images up to 10MB. New uploads are
+                                          Upload PNG, JPEG, GIF, WebP, or SVG images. New uploads are
           added to the outline immediately and saved when you save the outline.
         </p>
 
@@ -802,6 +798,23 @@ export function DocumentOutlineEditor({
                           value={item.caption}
                         />
                       </div>
+
+                      <label className="empty-report-toggle">
+                        <input
+                          checked={item.fullWidth}
+                          onChange={(event) =>
+                            updateOutlineItems((items) =>
+                              items.map((currentItem) =>
+                                currentItem.type === 'image' && currentItem.id === item.id
+                                  ? { ...currentItem, fullWidth: event.target.checked }
+                                  : currentItem,
+                              ),
+                            )
+                          }
+                          type="checkbox"
+                        />
+                        Full width image
+                      </label>
                     </div>
                   </div>
                 ) : null}

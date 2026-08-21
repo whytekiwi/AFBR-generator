@@ -245,7 +245,7 @@ export async function loadInput(inputDirectory) {
       if (item.type === 'image') {
         const src = imagePath(item, location);
         await access(resolveWithin(inputDirectory, src, `${location}.src`));
-        outline.push({ ...item, src });
+        outline.push({ ...item, src, fullWidth: item.fullWidth === true });
         continue;
       }
       if (item.type === 'department') {
@@ -265,7 +265,7 @@ export async function loadInput(inputDirectory) {
           } else if (child.type === 'image') {
             const src = imagePath(child, childLocation);
             await access(resolveWithin(inputDirectory, src, `${childLocation}.src`));
-            children.push({ ...child, src });
+            children.push({ ...child, src, fullWidth: false });
           } else {
             fail(`${childLocation}.type`, 'must equal "report" or "image"');
           }

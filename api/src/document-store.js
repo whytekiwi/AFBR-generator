@@ -211,9 +211,7 @@ export class BlobDocumentStore {
       ? contentType
       : IMAGE_TYPE_BY_EXTENSION.get(extension);
     if (!normalizedContentType) throw new Error('Unsupported image type');
-    if (bytes.length === 0 || bytes.length > 10 * 1024 * 1024) {
-      throw new Error('Images must be between 1 byte and 10 MB');
-    }
+    if (bytes.length === 0) throw new Error('Images must not be empty');
     await this.ensureContainer();
     const id = requestedId ?? randomUUID();
     if (!MEDIA_ID_PATTERN.test(id)) throw new Error('Invalid media id');

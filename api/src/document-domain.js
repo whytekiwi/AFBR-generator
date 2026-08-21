@@ -29,6 +29,9 @@ function id(value, field, errors, seenIds) {
 }
 
 function validateImage(item, field, errors, seenIds) {
+  if (item.fullWidth !== undefined && typeof item.fullWidth !== 'boolean') {
+    errors.push({ field: `${field}.fullWidth`, message: 'Must be a Boolean' });
+  }
   return {
     type: 'image',
     id: id(item.id, `${field}.id`, errors, seenIds),
@@ -37,6 +40,7 @@ function validateImage(item, field, errors, seenIds) {
     contentType: text(item.contentType, `${field}.contentType`, errors),
     altText: text(item.altText ?? '', `${field}.altText`, errors, { required: false }),
     caption: text(item.caption ?? '', `${field}.caption`, errors, { required: false }),
+    fullWidth: item.fullWidth ?? false,
   };
 }
 

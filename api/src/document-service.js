@@ -10,7 +10,7 @@ function failure(error, context) {
     return json(400, { error: error.message, fields: error.errors });
   }
   if (error instanceof DocumentNotFoundError) return json(404, { error: error.message });
-  if (['Invalid media id', 'Unsupported image type', 'Images must be between 1 byte and 10 MB']
+  if (['Invalid media id', 'Unsupported image type', 'Images must not be empty']
     .includes(error.message)) {
     return json(400, { error: error.message });
   }

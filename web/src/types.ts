@@ -104,6 +104,7 @@ export type ImageItem = {
   contentType: string;
   altText: string;
   caption: string;
+  fullWidth: boolean;
 };
 
 export type ReportItem = {

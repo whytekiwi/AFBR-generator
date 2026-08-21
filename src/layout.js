@@ -57,6 +57,21 @@ function addBlock(blocks, block) {
   return block.id;
 }
 
+function addDepartmentImageBlocks(outline, blocks) {
+  for (const item of outline ?? []) {
+    if (item.type !== 'department') continue;
+    for (const child of item.items) {
+      if (child.type === 'image') {
+        addBlock(blocks, {
+          id: `image:${child.id}`,
+          type: 'department-image',
+          insert: child,
+        });
+      }
+    }
+  }
+}
+
 function createTeamUnits(team, blocks) {
   const units = [];
   const teamHeadingId = addBlock(blocks, {
@@ -160,6 +175,7 @@ function createFrontMatterUnits(model, blocks) {
 
 export function createLayoutBlocks(model) {
   const blocks = {};
+  addDepartmentImageBlocks(model.outline, blocks);
   const departmentUnits = new Map(
     model.departments.map((department) => [
       department.id,
@@ -322,18 +338,15 @@ export function createSpreadPlan(model, measurements) {
           );
           pending = [];
         };
-        for (const child of item.items) {
+        for (let childIndex = 0; childIndex < item.items.length; childIndex += 1) {
+          const child = item.items[childIndex];
           if (child.type === 'report') {
             pending.push(...copyUnits(teamUnits.get(child.team.id)));
           } else {
-            flush();
-            spreads.push({
-              type: 'image-insert',
-              insert: child,
-              department: item.department,
-              departmentStart: isDepartmentStart,
+            pending.push({
+              id: `department-image:${child.id}`,
+              blockIds: [`image:${child.id}`],
             });
-            isDepartmentStart = false;
           }
         }
         flush();
