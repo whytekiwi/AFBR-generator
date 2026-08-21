@@ -29,14 +29,14 @@ function escapeHtml(value = '') {
     .replaceAll("'", '&#39;');
 }
 
-async function imageDataUri(path) {
+async function imageDataUri(path, contentType) {
   const bytes = await readFile(path);
-  const mimeType = MIME_TYPES[extname(path).toLowerCase()] ?? 'application/octet-stream';
+  const mimeType = contentType ?? MIME_TYPES[extname(path).toLowerCase()] ?? 'application/octet-stream';
   return `data:${mimeType};base64,${bytes.toString('base64')}`;
 }
 
-async function imageSource(src, inputDirectory) {
-  return imageDataUri(resolve(inputDirectory, src));
+async function imageSource(src, inputDirectory, contentType) {
+  return imageDataUri(resolve(inputDirectory, src), contentType);
 }
 
 const DEPARTMENT_COLOURS = [
@@ -129,7 +129,11 @@ function renderFrontSlot(slot, model, pageNumbers) {
 
 async function renderSpread(spread, model, plan) {
   if (spread.type === 'image-insert') {
-    const source = await imageSource(spread.insert.src, model.inputDirectory);
+    const source = await imageSource(
+      spread.insert.src,
+      model.inputDirectory,
+      spread.insert.contentType,
+    );
     const identity = spread.departmentStart ? departmentIdentity(spread.department) : null;
     const className = identity ? 'spread image-spread department-start' : 'spread image-spread';
     const style = identity ? ` style="--department-colour: ${identity.colour}"` : '';
@@ -178,7 +182,7 @@ export const defaultTheme = {
       imageDataUri(COVER_HERO_PATH),
       imageDataUri(COVER_LOGO_PATH),
     ]);
-    return `<!doctype html><html><head><meta charset="utf-8"><style>@page { size: A5 portrait; margin: 0; } * { box-sizing: border-box; } body { margin: 0; font-family: Arial, sans-serif; } .cover { height: 210mm; overflow: hidden; position: relative; } .cover-upper { align-items: center; background: #11181c; display: flex; flex-direction: column; height: 105mm; justify-content: center; padding: 16mm 14mm; text-align: center; } .cover-branding img { display: block; height: auto; margin: 0 auto 11mm; max-height: 32mm; max-width: 88mm; object-fit: contain; } .cover-copy h1 { color: #f5efdf; font-size: 28pt; letter-spacing: -.035em; line-height: 1.04; margin: 0; } .spectrum-divider { display: grid; grid-template-columns: repeat(6, 1fr); height: 2mm; left: 0; position: absolute; right: 0; top: 104mm; z-index: 2; } .spectrum-divider span:nth-child(1) { background: #b67868; } .spectrum-divider span:nth-child(2) { background: #b39154; } .spectrum-divider span:nth-child(3) { background: #7c966c; } .spectrum-divider span:nth-child(4) { background: #679099; } .spectrum-divider span:nth-child(5) { background: #7485a4; } .spectrum-divider span:nth-child(6) { background: #9a768c; } .cover-hero { height: 105mm; margin: 0; position: relative; } .cover-hero img { display: block; height: 100%; object-fit: cover; object-position: center center; width: 100%; } .cover-hero figcaption { background: transparent; bottom: 3mm; color: white; font-size: 7pt; left: 4mm; padding: 0; position: absolute; right: auto; text-shadow: none; } .watermark { color: rgba(128, 0, 0, .18); font-size: 48pt; font-weight: bold; left: 50%; position: fixed; top: 50%; transform: translate(-50%, -50%) rotate(-35deg); z-index: 1; }</style></head><body><main class="cover"><section class="cover-upper"><section class="cover-branding"><img src="${logoImage}" alt="Kiwiburn logo and tagline"></section><section class="cover-copy"><h1>${escapeHtml(model.document.cycle)} Afterburn Report</h1></section></section><div class="spectrum-divider" aria-hidden="true">${'<span></span>'.repeat(6)}</div><figure class="cover-hero"><img src="${heroImage}" alt="${escapeHtml(COVER_HERO_CREDIT)}"><figcaption>${escapeHtml(COVER_HERO_CREDIT)}</figcaption></figure>${renderWatermark(model.document)}</main></body></html>`;
+    return `<!doctype html><html><head><meta charset="utf-8"><style>@page { size: A5 portrait; margin: 0; } * { box-sizing: border-box; } body { margin: 0; font-family: Arial, sans-serif; } .cover { height: 210mm; overflow: hidden; position: relative; } .cover-upper { align-items: center; background: #11181c; display: flex; flex-direction: column; height: 105mm; justify-content: center; padding: 16mm 14mm; text-align: center; } .cover-branding img { display: block; height: auto; margin: 0 auto 11mm; max-height: 32mm; max-width: 88mm; object-fit: contain; } .cover-copy h1 { color: #f5efdf; font-size: 28pt; letter-spacing: -.035em; line-height: 1.04; margin: 0; } .spectrum-divider { display: grid; grid-template-columns: repeat(6, 1fr); height: 2mm; left: 0; position: absolute; right: 0; top: 104mm; z-index: 2; } .spectrum-divider span:nth-child(1) { background: #b67868; } .spectrum-divider span:nth-child(2) { background: #b39154; } .spectrum-divider span:nth-child(3) { background: #7c966c; } .spectrum-divider span:nth-child(4) { background: #679099; } .spectrum-divider span:nth-child(5) { background: #7485a4; } .spectrum-divider span:nth-child(6) { background: #9a768c; } .cover-hero { height: 105mm; margin: 0; position: relative; } .cover-hero img { display: block; height: 100%; object-fit: cover; object-position: center center; width: 100%; } .cover-hero figcaption { background: transparent; bottom: 3mm; color: white; font-size: 7pt; left: 4mm; padding: 0; position: absolute; right: auto; text-shadow: none; } .watermark { color: rgba(128, 0, 0, .18); font-size: 48pt; font-weight: bold; left: 50%; position: fixed; top: 50%; transform: translate(-50%, -50%) rotate(-35deg); z-index: 1; }</style></head><body><main class="cover"><section class="cover-upper"><section class="cover-branding"><img src="${logoImage}" alt="Kiwiburn logo and tagline"></section><section class="cover-copy"><h1>${escapeHtml(model.document.title)}</h1></section></section><div class="spectrum-divider" aria-hidden="true">${'<span></span>'.repeat(6)}</div><figure class="cover-hero"><img src="${heroImage}" alt="${escapeHtml(COVER_HERO_CREDIT)}"><figcaption>${escapeHtml(COVER_HERO_CREDIT)}</figcaption></figure>${renderWatermark(model.document)}</main></body></html>`;
   },
   async renderBody(model, plan) {
     const spreads = await Promise.all(plan.spreads.map((spread) => renderSpread(spread, model, plan)));

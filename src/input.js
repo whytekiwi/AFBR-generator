@@ -130,8 +130,11 @@ function validateManifest(manifest, manifestPath) {
     fail(`${manifestPath}.document.draft.watermarkText`, 'must be a string');
   }
 
-  if (!Array.isArray(manifest.departments) || manifest.departments.length === 0) {
-    fail(`${manifestPath}.departments`, 'must be a non-empty array');
+  if (!Array.isArray(manifest.departments)) {
+    fail(`${manifestPath}.departments`, 'must be an array');
+  }
+  if (manifest.departments.length === 0 && !Array.isArray(manifest.items)) {
+    fail(`${manifestPath}.departments`, 'must be non-empty when no normalized outline is supplied');
   }
 }
 

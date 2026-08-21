@@ -73,6 +73,48 @@ input/
 The manifest order is authoritative. The renderer must not derive department or
 team ordering from filenames or filesystem order.
 
+## Azure Blob Input Contract
+
+The same rendering pipeline can materialize a temporary input directory directly
+from Azure Blob Storage. This is a separate Node.js 22 CLI/background workload,
+not part of the Node.js 20 managed Static Web Apps Functions artifact.
+
+Invoke it with:
+
+```powershell
+$env:AZURE_STORAGE_CONNECTION_STRING = '<connection-string>'
+node src\cli.js --blob --cycle 2026 --draft false --output output\afterburn-report.pdf
+```
+
+`AZURE_STORAGE_CONNECTION_STRING` is required. `REPORTS_CONTAINER` defaults to
+`afterburn-reports`, and `DOCUMENT_CONTAINER` defaults to
+`afterburn-document`. `--cycle` and `--draft true|false` are required so the
+renderer never infers publication state. `--title` and `--watermark-text` may
+override their derived defaults.
+
+The reports container stores one canonical `{reportId}.md` blob per report. The
+document container stores:
+
+```text
+manifest.json
+sections/{sectionId}/{saveUuid}.md
+media/{uuid}
+```
+
+`manifest.json` is normalized version 1. Its top-level ordered items are
+sections, contents, images, and departments. Department children are reports or
+images. Section items reference their exact immutable Markdown blob. Image
+items reference `mediaId`; their `fileName`, `contentType`, `altText`, and
+`caption` remain in the manifest. The renderer downloads only placed reports
+and referenced sections/media, preserves manifest order, and validates report
+identity against its containing department.
+
+Blob bytes are read privately with the Azure SDK and written to a secure
+temporary renderer-compatible tree. Temporary files are always removed. The
+renderer does not expose containers publicly and does not require SAS URLs.
+Missing or malformed manifests, sections, reports, and media fail with the
+container, blob reference, and affected manifest location where applicable.
+
 ### Static Image Inserts
 
 Static images are declared in the manifest as semantic inserts. They are placed

@@ -38,8 +38,8 @@ settings:
 The **Reports** workspace edits individual team reports. The **Document outline**
 workspace controls the final order, custom Markdown sections, departments, team
 reports, and uploaded images. Outline data is stored in `manifest.json`, custom
-sections in `sections/*.md`, and image assets in `media/*` within the document
-container.
+sections in immutable `sections/{sectionId}/{saveUuid}.md` blobs, and image
+assets in `media/{uuid}` within the document container.
 
 Authentication is intentionally not implemented by this application. Azure Easy
 Auth can protect the deployed routes separately.
@@ -59,16 +59,48 @@ valid input to the PDF renderer.
 
 ## Render a PDF
 
-Generate a PDF booklet from an input directory:
+The renderer requires Node.js 22 and Playwright. Install its dependencies and
+browser once:
 
 ```powershell
 npm install
 npx playwright install chromium
+```
+
+Generate a PDF booklet from an input directory:
+
+```powershell
 node src\cli.js --input sample-data --output output\afterburn-report.pdf
 ```
 
+To render the active document directly from private Blob Storage, configure the
+same storage settings used by the editor and select the cycle and draft state
+explicitly:
+
+```powershell
+$env:AZURE_STORAGE_CONNECTION_STRING = '<connection-string>'
+$env:REPORTS_CONTAINER = 'afterburn-reports'   # optional default
+$env:DOCUMENT_CONTAINER = 'afterburn-document' # optional default
+node src\cli.js --blob --cycle 2026 --draft false --output output\afterburn-report.pdf
+```
+
+`--title` and `--watermark-text` are optional. The default title is
+`Kiwiburn {cycle} Afterburn Report`; the default watermark text is `DRAFT`.
+Blob input is downloaded through the Azure SDK into a private temporary
+renderer-compatible tree and is removed after success or failure. It does not
+use public blob URLs or SAS tokens.
+
+The reports container contains canonical `{reportId}.md` blobs. The document
+container contains `manifest.json`, the exact immutable section blobs referenced
+by that manifest, and referenced `media/{uuid}` blobs. A missing or invalid
+reference fails generation instead of being omitted.
+
 The generator performs a two-pass render. It first measures final department
 positions, then renders the table of contents with the resulting page numbers.
+
+PDF rendering is intentionally a separate root CLI/background workload. It is
+not included in the managed Azure Static Web Apps Functions artifact in `api/`,
+which remains self-contained on Node.js 20 and does not install Playwright.
 
 The stable pipeline lives in `src/`. Visual direction belongs in
 `src/themes/default.js`; future design iterations can replace that module
