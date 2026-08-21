@@ -6,6 +6,7 @@ import {
   fetchReports,
   updateReport,
 } from './api';
+import { DocumentOutlineEditor } from './components/DocumentOutlineEditor';
 import { ReportEditor } from './components/ReportEditor';
 import { ReportList } from './components/ReportList';
 import {
@@ -17,6 +18,8 @@ import {
   type ReportSummary,
   toUpsertPayload,
 } from './types';
+
+type AppMode = 'document' | 'reports';
 
 type NoticeState = {
   message: string;
@@ -66,16 +69,22 @@ const findLikelyCreatedReport = (
 export default function App() {
   const isDesktop = useIsDesktop();
 
+  const [appMode, setAppMode] = useState<AppMode>('reports');
   const [searchValue, setSearchValue] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [summaries, setSummaries] = useState<ReportSummary[]>([]);
+  const [allReportSummaries, setAllReportSummaries] = useState<ReportSummary[]>([]);
   const [selectedId, setSelectedId] = useState<string | 'new' | null>(null);
   const [draft, setDraft] = useState<EditableReport | null>(null);
   const [savedDraft, setSavedDraft] = useState<EditableReport | null>(null);
   const [mobilePane, setMobilePane] = useState<'editor' | 'list'>('list');
   const [notice, setNotice] = useState<NoticeState>(null);
+  const [isNoticeFading, setIsNoticeFading] = useState(false);
+  const [hasDocumentUnsavedChanges, setHasDocumentUnsavedChanges] = useState(false);
   const [isListLoading, setIsListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
+  const [isAllReportsLoading, setIsAllReportsLoading] = useState(true);
+  const [allReportsError, setAllReportsError] = useState<string | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -118,12 +127,47 @@ export default function App() {
     [searchQuery],
   );
 
+  const loadAllReportSummaries = useCallback(
+    async (options?: { signal?: AbortSignal; silent?: boolean }) => {
+      const { signal, silent = false } = options ?? {};
+
+      if (!silent) {
+        setIsAllReportsLoading(true);
+      }
+
+      setAllReportsError(null);
+
+      try {
+        const items = await fetchReports('', signal);
+        setAllReportSummaries(items);
+        setIsAllReportsLoading(false);
+        return items;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return null;
+        }
+
+        setAllReportsError(getErrorMessage(error));
+        setIsAllReportsLoading(false);
+        return null;
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
     const controller = new AbortController();
     void loadReports({ signal: controller.signal });
 
     return () => controller.abort();
   }, [loadReports, listRefreshKey]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadAllReportSummaries({ signal: controller.signal });
+
+    return () => controller.abort();
+  }, [loadAllReportSummaries, listRefreshKey]);
 
   useEffect(() => {
     if (isDesktop) {
@@ -190,8 +234,10 @@ export default function App() {
     [draft, savedDraft],
   );
 
+  const hasAnyUnsavedChanges = hasUnsavedChanges || hasDocumentUnsavedChanges;
+
   useEffect(() => {
-    if (!hasUnsavedChanges) {
+    if (!hasAnyUnsavedChanges) {
       return;
     }
 
@@ -203,11 +249,51 @@ export default function App() {
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+  }, [hasAnyUnsavedChanges]);
+
+  useEffect(() => {
+    if (!notice) {
+      setIsNoticeFading(false);
+      return;
+    }
+
+    setIsNoticeFading(false);
+    const fadeTimer = window.setTimeout(() => setIsNoticeFading(true), 10_000);
+    const clearTimer = window.setTimeout(() => setNotice(null), 10_400);
+
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(clearTimer);
+    };
+  }, [notice]);
 
   const confirmDiscardChanges = () =>
     !hasUnsavedChanges ||
     window.confirm('You have unsaved changes. Discard them and continue?');
+
+  const confirmModeSwitch = (nextMode: AppMode) => {
+    if (nextMode === appMode) {
+      return true;
+    }
+
+    const modeHasUnsavedChanges =
+      appMode === 'reports' ? hasUnsavedChanges : hasDocumentUnsavedChanges;
+
+    return (
+      !modeHasUnsavedChanges ||
+      window.confirm(
+        `You have unsaved changes in ${appMode === 'reports' ? 'Reports' : 'Document outline'}. Switch modes anyway?`,
+      )
+    );
+  };
+
+  const handleModeChange = (nextMode: AppMode) => {
+    if (!confirmModeSwitch(nextMode)) {
+      return;
+    }
+
+    setAppMode(nextMode);
+  };
 
   const openExistingReport = (summary: ReportSummary) => {
     if (summary.id === selectedId) {
@@ -307,16 +393,18 @@ export default function App() {
 
       if (selectedId === 'new' || !draft.id) {
         const createdReport = await createReport(payload);
-        const items = await loadReports({ silent: true });
+        const [visibleItems, allItems] = await Promise.all([
+          loadReports({ silent: true }),
+          loadAllReportSummaries({ silent: true }),
+        ]);
         const nextDraft = createdReport
           ? createEditableFromReport(createdReport)
           : { ...draft };
+        const candidateSummaries = allItems ?? visibleItems ?? [];
         const nextSummary =
           createdReport?.id
-            ? { id: createdReport.id } as ReportSummary
-            : items
-              ? findLikelyCreatedReport(items, draft)
-              : null;
+            ? ({ id: createdReport.id } as ReportSummary)
+            : findLikelyCreatedReport(candidateSummaries, draft);
 
         setDraft(nextDraft);
         setSavedDraft(nextDraft);
@@ -338,7 +426,10 @@ export default function App() {
 
         setDraft(editableReport);
         setSavedDraft(editableReport);
-        await loadReports({ silent: true });
+        await Promise.all([
+          loadReports({ silent: true }),
+          loadAllReportSummaries({ silent: true }),
+        ]);
         setNotice({ tone: 'success', message: 'Report saved successfully.' });
       }
     } catch (error) {
@@ -366,7 +457,10 @@ export default function App() {
 
     try {
       await deleteReport(selectedId);
-      const items = await loadReports({ silent: true });
+      const [items] = await Promise.all([
+        loadReports({ silent: true }),
+        loadAllReportSummaries({ silent: true }),
+      ]);
 
       setNotice({ tone: 'success', message: 'Report deleted successfully.' });
 
@@ -385,58 +479,96 @@ export default function App() {
     }
   };
 
+  const handleDocumentNotice = (nextNotice: NoticeState) => {
+    setNotice(nextNotice);
+  };
+
   return (
-    <div className="app-shell" data-mobile-pane={mobilePane}>
+    <div className="app-shell" data-mobile-pane={mobilePane} data-mode={appMode}>
       {notice ? (
         <div
           aria-live="polite"
-          className={`app-notice flash-banner flash-banner--${notice.tone}`}
+          className={`app-notice flash-banner flash-banner--${notice.tone}${isNoticeFading ? ' is-fading' : ''}`}
           role={notice.tone === 'error' ? 'alert' : 'status'}
         >
           {notice.message}
         </div>
       ) : null}
 
-      <main className="workspace-grid">
-        <div className="app-list-pane">
-          <ReportList
-            error={listError}
-            hasUnsavedChanges={hasUnsavedChanges}
-            items={summaries}
-            loading={isListLoading}
-            onAdd={openNewReport}
-            onRetry={refreshList}
-            onSearchChange={setSearchValue}
-            onSelect={openExistingReport}
-            searchValue={searchValue}
-            selectedId={selectedId && selectedId !== 'new' ? selectedId : null}
-          />
-        </div>
+      <nav aria-label="Workspace sections" className="app-nav">
+        <button
+          aria-pressed={appMode === 'reports'}
+          className={`app-nav__button${appMode === 'reports' ? ' is-active' : ''}`}
+          onClick={() => handleModeChange('reports')}
+          type="button"
+        >
+          Reports
+        </button>
+        <button
+          aria-pressed={appMode === 'document'}
+          className={`app-nav__button${appMode === 'document' ? ' is-active' : ''}`}
+          onClick={() => handleModeChange('document')}
+          type="button"
+        >
+          Document outline
+        </button>
+      </nav>
 
-        <div className="app-editor-pane">
-          <ReportEditor
-            canDelete={Boolean(selectedId && selectedId !== 'new')}
-            canSave={canSave}
-            error={detailError}
-            fieldErrors={fieldErrors}
-            hasUnsavedChanges={hasUnsavedChanges}
-            isDeleting={isDeleting}
-            isLoading={isDetailLoading}
-            isNew={selectedId === 'new'}
-            isSaving={isSaving}
-            onBack={handleBackToList}
-            onChangeIdentityField={handleIdentityChange}
-            onChangeMarkdownField={handleMarkdownChange}
-            onDelete={handleDelete}
-            onRetry={() => {
-              if (selectedId && selectedId !== 'new') {
-                void loadSelectedReport(selectedId);
-              }
-            }}
-            onSave={handleSave}
-            report={draft}
+      <main className="workspace-stack">
+        <section className={`workspace-panel${appMode === 'reports' ? ' is-active' : ''}`}>
+          <div className="workspace-grid">
+            <div className="app-list-pane">
+              <ReportList
+                error={listError}
+                hasUnsavedChanges={hasUnsavedChanges}
+                items={summaries}
+                loading={isListLoading}
+                onAdd={openNewReport}
+                onRetry={refreshList}
+                onSearchChange={setSearchValue}
+                onSelect={openExistingReport}
+                searchValue={searchValue}
+                selectedId={selectedId && selectedId !== 'new' ? selectedId : null}
+              />
+            </div>
+
+            <div className="app-editor-pane">
+              <ReportEditor
+                canDelete={Boolean(selectedId && selectedId !== 'new')}
+                canSave={canSave}
+                error={detailError}
+                fieldErrors={fieldErrors}
+                hasUnsavedChanges={hasUnsavedChanges}
+                isDeleting={isDeleting}
+                isLoading={isDetailLoading}
+                isNew={selectedId === 'new'}
+                isSaving={isSaving}
+                onBack={handleBackToList}
+                onChangeIdentityField={handleIdentityChange}
+                onChangeMarkdownField={handleMarkdownChange}
+                onDelete={handleDelete}
+                onRetry={() => {
+                  if (selectedId && selectedId !== 'new') {
+                    void loadSelectedReport(selectedId);
+                  }
+                }}
+                onSave={handleSave}
+                report={draft}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className={`workspace-panel${appMode === 'document' ? ' is-active' : ''}`}>
+          <DocumentOutlineEditor
+            onNotice={handleDocumentNotice}
+            onRetryReports={refreshList}
+            onUnsavedChange={setHasDocumentUnsavedChanges}
+            reportSummaries={allReportSummaries}
+            reportsError={allReportsError}
+            reportsLoading={isAllReportsLoading}
           />
-        </div>
+        </section>
       </main>
     </div>
   );

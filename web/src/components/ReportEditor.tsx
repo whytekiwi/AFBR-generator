@@ -89,7 +89,7 @@ export function ReportEditor({
       <section className="editor-panel">
         <div className="state-card">
           <h2>Loading report</h2>
-          <p>Pulling the latest content from the API‚Ä¶</p>
+          <p>Pulling the latest content from the APIÖ</p>
         </div>
       </section>
     );
@@ -134,7 +134,7 @@ export function ReportEditor({
       >
         <div className="editor-panel__header">
           <button className="back-button" onClick={onBack} type="button">
-            ‚Üê Reports
+            ? Reports
           </button>
 
           <div className="editor-panel__title-group">
@@ -158,7 +158,7 @@ export function ReportEditor({
                 onClick={onDelete}
                 type="button"
               >
-                {isDeleting ? 'Deleting‚Ä¶' : 'Delete'}
+                {isDeleting ? 'DeletingÖ' : 'Delete'}
               </button>
             ) : null}
 
@@ -167,7 +167,7 @@ export function ReportEditor({
               disabled={!canSave || isSaving || isDeleting}
               type="submit"
             >
-              {isSaving ? 'Saving‚Ä¶' : 'Save report'}
+              {isSaving ? 'SavingÖ' : 'Save report'}
             </button>
           </div>
         </div>
@@ -200,10 +200,10 @@ export function ReportEditor({
         <div className="markdown-sections">
           {markdownFieldKeys.map((field) => (
             <MarkdownField
-              field={field}
+              id={`report-${field}`}
               key={field}
               label={markdownFieldLabels[field]}
-              onChange={onChangeMarkdownField}
+              onChange={(value) => onChangeMarkdownField(field, value)}
               value={report[field]}
             />
           ))}

@@ -1,12 +1,12 @@
 import { useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import type { MarkdownFieldKey } from '../types';
 
 type MarkdownFieldProps = {
   disabled?: boolean;
-  field: MarkdownFieldKey;
+  id: string;
   label: string;
-  onChange: (field: MarkdownFieldKey, value: string) => void;
+  onChange: (value: string) => void;
+  placeholder?: string;
   value: string;
 };
 
@@ -59,15 +59,16 @@ const prefixSelectedLines = (
 
 export function MarkdownField({
   disabled = false,
-  field,
+  id,
   label,
   onChange,
+  placeholder,
   value,
 }: MarkdownFieldProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isPreview, setIsPreview] = useState(false);
 
-  const fieldId = `${field}-textarea`;
+  const fieldId = `${id}-textarea`;
 
   const toolbarActions = useMemo(
     () => [
@@ -91,7 +92,7 @@ export function MarkdownField({
       },
       {
         ariaLabel: `Create a bulleted list in ${label}`,
-        label: '• List',
+        label: 'Bullet list',
         apply: (currentValue: string, start: number, end: number) =>
           prefixSelectedLines(currentValue, start, end, () => '- '),
       },
@@ -133,7 +134,7 @@ export function MarkdownField({
       textarea.selectionEnd,
     );
 
-    onChange(field, result.nextValue);
+    onChange(result.nextValue);
 
     requestAnimationFrame(() => {
       textarea.focus();
@@ -209,8 +210,8 @@ export function MarkdownField({
           className="markdown-textarea"
           disabled={disabled}
           id={fieldId}
-          onChange={(event) => onChange(field, event.target.value)}
-          placeholder={`Write the ${label.toLowerCase()} in Markdown...`}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder ?? `Write the ${label.toLowerCase()} in Markdown...`}
           ref={textareaRef}
           rows={8}
           value={value}

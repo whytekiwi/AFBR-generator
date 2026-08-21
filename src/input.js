@@ -50,6 +50,18 @@ async function readReport(path) {
   }
 }
 
+async function readContentSection(path) {
+  let contents;
+  try {
+    contents = await readFile(path, 'utf8');
+  } catch {
+    fail(path, 'could not be read');
+  }
+  const match = contents.replace(/^\uFEFF/, '').match(/^#\s+(.+?)\s*\r?\n(?:\r?\n)?([\s\S]*)$/);
+  if (!match) fail(path, 'must begin with one level-one title');
+  return { title: match[1].trim(), body: match[2].trim() };
+}
+
 function isObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
@@ -59,6 +71,15 @@ function requireString(value, location) {
     fail(location, 'must be a non-empty string');
   }
   return value;
+}
+
+function imagePath(item, location) {
+  if (typeof item.src === 'string' && item.src.trim() !== '') return item.src;
+  const mediaId = requireString(item.mediaId, `${location}.mediaId`);
+  if (!/^[a-zA-Z0-9._-]+$/.test(mediaId)) {
+    fail(`${location}.mediaId`, 'must contain letters, numbers, dots, underscores, or hyphens only');
+  }
+  return `media/${mediaId}`;
 }
 
 function resolveWithin(directory, relativePath, location) {
@@ -195,5 +216,62 @@ export async function loadInput(inputDirectory) {
     }
   }
 
-  return { inputDirectory, manifest, departments, inserts };
+  let outline = null;
+  if (Array.isArray(manifest.items)) {
+    const teamsById = new Map(
+      departments.flatMap((department) => department.teams.map((team) => [team.id, team])),
+    );
+    outline = [];
+    for (const [index, item] of manifest.items.entries()) {
+      const location = `${manifestPath}.items[${index}]`;
+      if (!isObject(item)) fail(location, 'must contain an object');
+      if (item.type === 'contents') {
+        outline.push({ type: 'contents', id: requireString(item.id, `${location}.id`) });
+        continue;
+      }
+      if (item.type === 'section') {
+        const id = requireString(item.id, `${location}.id`);
+        const file = requireString(item.file, `${location}.file`);
+        const section = await readContentSection(
+          resolveWithin(inputDirectory, file, `${location}.file`),
+        );
+        outline.push({ type: 'section', id, ...section });
+        continue;
+      }
+      if (item.type === 'image') {
+        const src = imagePath(item, location);
+        await access(resolveWithin(inputDirectory, src, `${location}.src`));
+        outline.push({ ...item, src });
+        continue;
+      }
+      if (item.type === 'department') {
+        const departmentId = requireString(item.id, `${location}.id`);
+        const department = departments.find(({ id }) => id === departmentId);
+        if (!department) fail(`${location}.id`, `references unknown department "${departmentId}"`);
+        const children = [];
+        for (const [childIndex, child] of (item.items ?? []).entries()) {
+          const childLocation = `${location}.items[${childIndex}]`;
+          if (child.type === 'report') {
+            const reportId = requireString(child.reportId, `${childLocation}.reportId`);
+            const team = teamsById.get(reportId);
+            if (!team || !department.teams.some(({ id }) => id === reportId)) {
+              fail(`${childLocation}.reportId`, `references unknown report "${reportId}"`);
+            }
+            children.push({ type: 'report', team });
+          } else if (child.type === 'image') {
+            const src = imagePath(child, childLocation);
+            await access(resolveWithin(inputDirectory, src, `${childLocation}.src`));
+            children.push({ ...child, src });
+          } else {
+            fail(`${childLocation}.type`, 'must equal "report" or "image"');
+          }
+        }
+        outline.push({ type: 'department', department, items: children });
+        continue;
+      }
+      fail(`${location}.type`, 'must equal "section", "contents", "image", or "department"');
+    }
+  }
+
+  return { inputDirectory, manifest, departments, inserts, outline };
 }

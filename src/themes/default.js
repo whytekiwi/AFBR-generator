@@ -65,6 +65,8 @@ function renderBlock(block) {
       return `<section class="layout-block not-received" data-layout-block="${escapeHtml(block.id)}"><strong>Not received</strong><p>This team has not supplied a report.</p></section>`;
     case 'report-section-heading':
       return `<section class="layout-block report-section-heading" data-layout-block="${escapeHtml(block.id)}"><h3>${escapeHtml(block.title)}</h3></section>`;
+    case 'content-section-heading':
+      return `<section class="layout-block content-section-heading" data-layout-block="${escapeHtml(block.id)}"><h1>${escapeHtml(block.title)}</h1></section>`;
     case 'report-markdown':
       return `<section class="layout-block report-markdown" data-layout-block="${escapeHtml(block.id)}">${renderMarkdown(block.markdown)}</section>`;
     case 'report-empty':
@@ -86,6 +88,8 @@ function bodyStyles() {
     .author { color: #52606d; flex: 0 0 auto; font-size: 8.5pt; margin: 0; text-align: right; }
     .report-section-heading { padding-bottom: 1mm; }
     .report-section-heading h3 { color: #243b53; font-size: 11pt; line-height: 1.2; margin: 0; }
+    .content-section-heading { border-bottom: 1mm solid #52606d; margin-bottom: 4mm; padding-bottom: 3mm; }
+    .content-section-heading h1 { color: #243b53; font-size: 22pt; line-height: 1.15; margin: 0; }
     .report-markdown { overflow-wrap: anywhere; padding-bottom: 3mm; }
     .report-markdown p { margin-bottom: 2.5mm; }
     .report-markdown ul, .report-markdown ol { margin: 0 0 2.5mm; padding-left: 5mm; }
@@ -111,7 +115,7 @@ function renderPageFooter(document, pageNumber) {
 function renderFrontSlot(slot, model, pageNumbers) {
   switch (slot.type) {
     case 'contents':
-      return `<p class="eyebrow">Navigation</p><h2>Contents</h2><ol class="contents-list">${model.tableOfContents.map(({ id, name }) => `<li><span>${escapeHtml(name)}</span><span>${pageNumbers[id]}</span></li>`).join('')}</ol>`;
+      return `<p class="eyebrow">Navigation</p><h2>Contents</h2><ol class="contents-list">${model.tableOfContents.map(({ id, name }) => `<li><span>${escapeHtml(name)}</span><span>${pageNumbers[id] ?? ''}</span></li>`).join('')}</ol>`;
     case 'placeholder':
       return `<p class="eyebrow">Front matter</p><h2>${escapeHtml(slot.section?.title ?? 'Placeholder')}</h2><p>Content will be supplied later.</p>`;
     case 'welcome':
@@ -126,7 +130,13 @@ function renderFrontSlot(slot, model, pageNumbers) {
 async function renderSpread(spread, model, plan) {
   if (spread.type === 'image-insert') {
     const source = await imageSource(spread.insert.src, model.inputDirectory);
-    return `<section class="spread image-spread"><figure><img src="${source}" alt="${escapeHtml(spread.insert.altText ?? '')}">${spread.insert.caption ? `<figcaption>${escapeHtml(spread.insert.caption)}</figcaption>` : ''}</figure>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
+    const identity = spread.departmentStart ? departmentIdentity(spread.department) : null;
+    const className = identity ? 'spread image-spread department-start' : 'spread image-spread';
+    const style = identity ? ` style="--department-colour: ${identity.colour}"` : '';
+    const hero = identity
+      ? `<header class="department-hero"><div><p>${escapeHtml(identity.eyebrow)}</p><h1>${escapeHtml(identity.title)}</h1></div></header>`
+      : '';
+    return `<section class="${className}"${style}>${hero}<figure><img src="${source}" alt="${escapeHtml(spread.insert.altText ?? '')}">${spread.insert.caption ? `<figcaption>${escapeHtml(spread.insert.caption)}</figcaption>` : ''}</figure>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
   }
 
   if (spread.type === 'financials') {
@@ -135,6 +145,13 @@ async function renderSpread(spread, model, plan) {
 
   if (spread.type === 'front-matter') {
     return `<section class="spread front-spread"><div class="spread-grid">${spread.slots.map((slot) => `<article class="booklet-page">${renderFrontSlot(slot, model, plan.pageNumbers)}</article>`).join('')}</div>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
+  }
+
+  if (spread.type === 'content-section') {
+    const pages = spread.slots.map(
+      (slot) => `<article class="booklet-page">${renderBlocks(slot.units, plan.blocks)}</article>`,
+    );
+    return `<section class="spread content-section-spread"><div class="spread-grid">${pages.join('')}</div>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
   }
 
   const identity = departmentIdentity(spread.department);
@@ -165,6 +182,6 @@ export const defaultTheme = {
   },
   async renderBody(model, plan) {
     const spreads = await Promise.all(plan.spreads.map((spread) => renderSpread(spread, model, plan)));
-    return `<!doctype html><html><head><meta charset="utf-8"><style>@page { size: A4 landscape; margin: 0; } ${bodyStyles()} body { background: white; } .spread { break-after: page; height: 210mm; overflow: hidden; padding: 10mm; position: relative; width: 297mm; } .spread-grid { display: grid; gap: 4mm; grid-template-columns: repeat(2, minmax(0, 1fr)); height: 190mm; } .booklet-page { background: #fff; min-width: 0; padding: 9mm; } .front-spread .booklet-page, .final-spread .booklet-page { background: #f8fafc; } .front-spread h2, .final-spread h2 { font-size: 22pt; line-height: 1.16; } .eyebrow { color: #52606d; font-size: 8pt; font-weight: bold; letter-spacing: .14em; text-transform: uppercase; } .contents-list { list-style: none; margin: 8mm 0 0; padding: 0; } .contents-list li { border-bottom: 1px solid #d9e2ec; display: flex; justify-content: space-between; padding: 2.4mm 0; } .department-hero { align-items: center; background: var(--department-colour); color: white; display: flex; height: 20mm; margin: -10mm -10mm 0; padding: 4.5mm 10mm; } .department-hero h1 { font-size: 22pt; line-height: 1; margin: 0; } .department-start .spread-grid { height: 170mm; } .department-continuation { padding-left: 17mm; } .department-continuation .spread-grid { height: 190mm; } .department-continuation .booklet-page { border-top: 1mm solid var(--department-colour); } .department-rail { background: var(--department-colour); bottom: 0; color: white; font-size: 8pt; font-weight: bold; left: 0; letter-spacing: .12em; padding: 8mm 3mm; position: absolute; text-orientation: mixed; text-transform: uppercase; top: 0; writing-mode: vertical-rl; } .image-spread { align-items: center; display: flex; justify-content: center; } .image-spread figure { margin: 0; max-height: 180mm; max-width: 260mm; text-align: center; } .image-spread img { display: block; height: auto; max-height: 170mm; max-width: 100%; } figcaption { color: #52606d; font-size: 8.5pt; margin-top: 3mm; } .page-footer { bottom: 4mm; color: #667085; display: flex; font-size: 8pt; justify-content: space-between; left: 10mm; position: absolute; right: 7mm; } .department-continuation .page-footer { left: 20mm; } .watermark { color: rgba(128, 0, 0, .16); font-size: 64pt; font-weight: bold; left: 50%; pointer-events: none; position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(-35deg); z-index: 2; }</style></head><body>${spreads.join('')}</body></html>`;
+    return `<!doctype html><html><head><meta charset="utf-8"><style>@page { size: A4 landscape; margin: 0; } ${bodyStyles()} body { background: white; } .spread { break-after: page; height: 210mm; overflow: hidden; padding: 10mm; position: relative; width: 297mm; } .spread-grid { display: grid; gap: 4mm; grid-template-columns: repeat(2, minmax(0, 1fr)); height: 190mm; } .booklet-page { background: #fff; min-width: 0; padding: 9mm; } .front-spread .booklet-page, .final-spread .booklet-page { background: #f8fafc; } .front-spread h2, .final-spread h2 { font-size: 22pt; line-height: 1.16; } .eyebrow { color: #52606d; font-size: 8pt; font-weight: bold; letter-spacing: .14em; text-transform: uppercase; } .contents-list { list-style: none; margin: 8mm 0 0; padding: 0; } .contents-list li { border-bottom: 1px solid #d9e2ec; display: flex; justify-content: space-between; padding: 2.4mm 0; } .department-hero { align-items: center; background: var(--department-colour); color: white; display: flex; height: 20mm; margin: -10mm -10mm 0; padding: 4.5mm 10mm; } .department-hero h1 { font-size: 22pt; line-height: 1; margin: 0; } .department-start .spread-grid { height: 170mm; } .department-continuation { padding-left: 17mm; } .department-continuation .spread-grid { height: 190mm; } .department-continuation .booklet-page { border-top: 1mm solid var(--department-colour); } .department-rail { background: var(--department-colour); bottom: 0; color: white; font-size: 8pt; font-weight: bold; left: 0; letter-spacing: .12em; padding: 8mm 3mm; position: absolute; text-orientation: mixed; text-transform: uppercase; top: 0; writing-mode: vertical-rl; } .image-spread { align-items: center; display: flex; justify-content: center; } .image-spread.department-start { display: block; } .image-spread.department-start figure { margin: 10mm auto 0; max-height: 150mm; } .image-spread.department-start img { max-height: 140mm; } .image-spread figure { margin: 0; max-height: 180mm; max-width: 260mm; text-align: center; } .image-spread img { display: block; height: auto; max-height: 170mm; max-width: 100%; } figcaption { color: #52606d; font-size: 8.5pt; margin-top: 3mm; } .page-footer { bottom: 4mm; color: #667085; display: flex; font-size: 8pt; justify-content: space-between; left: 10mm; position: absolute; right: 7mm; } .department-continuation .page-footer { left: 20mm; } .watermark { color: rgba(128, 0, 0, .16); font-size: 64pt; font-weight: bold; left: 50%; pointer-events: none; position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(-35deg); z-index: 2; }</style></head><body>${spreads.join('')}</body></html>`;
   },
 };

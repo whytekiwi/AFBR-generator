@@ -68,3 +68,46 @@ test('saves a valid report', async () => {
   assert.equal(response.status, 200);
   assert.equal(response.jsonBody.id, 'backburners');
 });
+
+test('removes outline placements before deleting a report', async () => {
+  const operations = [];
+  const store = {
+    async delete(id) {
+      operations.push(`delete:${id}`);
+    },
+  };
+  const documentStore = {
+    async get() {
+      return {
+        version: 1,
+        items: [
+          {
+            type: 'department',
+            id: 'admin',
+            name: 'Admin',
+            items: [
+              { type: 'report', reportId: 'backburners' },
+              { type: 'report', reportId: 'rangers' },
+            ],
+          },
+        ],
+      };
+    },
+    async save(outline) {
+      operations.push('save-outline');
+      assert.deepEqual(outline.items[0].items, [
+        { type: 'report', reportId: 'rangers' },
+      ]);
+    },
+  };
+
+  const response = await handleItem(
+    request('DELETE', { id: 'backburners' }),
+    context,
+    store,
+    documentStore,
+  );
+
+  assert.equal(response.status, 204);
+  assert.deepEqual(operations, ['save-outline', 'delete:backburners']);
+});

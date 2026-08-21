@@ -81,6 +81,35 @@ test('removes revision-status headings from selected report content', () => {
   );
 });
 
+test('builds contents from the normalized outline order', () => {
+  const model = createDocumentModel({
+    inputDirectory: '/input',
+    manifest: {
+      document: { draft: { enabled: false } },
+      frontMatter: {},
+      financials: {},
+    },
+    inserts: [],
+    departments: [
+      { id: 'admin', name: 'Admin', teams: [] },
+      { id: 'arts', name: 'Arts', teams: [] },
+    ],
+    outline: [
+      { type: 'section', id: 'welcome', title: 'Welcome', body: '' },
+      {
+        type: 'department',
+        department: { id: 'arts' },
+        items: [],
+      },
+    ],
+  });
+
+  assert.deepEqual(model.tableOfContents, [
+    { id: 'welcome', name: 'Welcome' },
+    { id: 'arts', name: 'Arts' },
+  ]);
+});
+
 test('loads the complete sample fixture set', async () => {
   const input = await loadInput(fileURLToPath(new URL('../sample-data', import.meta.url)));
 

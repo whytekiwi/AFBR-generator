@@ -2,6 +2,7 @@ import {
   ReportValidationError,
   validateReport,
 } from './report-document.js';
+import { BlobDocumentStore } from './document-store.js';
 import { BlobReportStore, ReportNotFoundError } from './report-store.js';
 
 function json(status, body) {
@@ -47,12 +48,28 @@ export async function handleCollection(request, context, store) {
   }
 }
 
-export async function handleItem(request, context, store) {
+export async function handleItem(request, context, store, documentStore) {
   try {
     store ??= BlobReportStore.fromEnvironment();
     const id = request.params.id;
     if (request.method === 'GET') return json(200, await store.get(id));
     if (request.method === 'DELETE') {
+      documentStore ??= BlobDocumentStore.fromEnvironment();
+      const outline = await documentStore.get();
+      const nextOutline = {
+        ...outline,
+        items: outline.items.map((item) => item.type === 'department'
+          ? {
+              ...item,
+              items: item.items.filter(
+                (child) => child.type !== 'report' || child.reportId !== id,
+              ),
+            }
+          : item),
+      };
+      if (JSON.stringify(nextOutline) !== JSON.stringify(outline)) {
+        await documentStore.save(nextOutline);
+      }
       await store.delete(id);
       return { status: 204 };
     }
