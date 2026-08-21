@@ -132,7 +132,7 @@ export function createReportMetadata(report) {
     authorname: encodeMetadata(normalized.authorName),
     team: encodeMetadata(normalized.team),
     department: encodeMetadata(normalized.department),
-    empty: normalized.empty,
+    empty: String(normalized.empty),
     searchtext: encodeMetadata(
       `${normalized.authorName} ${normalized.team} ${normalized.department}`.toLowerCase(),
     ),
