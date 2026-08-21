@@ -111,16 +111,20 @@ test('builds contents from the normalized outline order', () => {
   ]);
 });
 
-test('loads the complete sample fixture set', async (context) => {
+test('keeps filesystem loading tied to manifest report paths', async () => {
+  const inputDirectory = fileURLToPath(new URL('../sample-data', import.meta.url));
   try {
     await access(fileURLToPath(
       new URL('../sample-data/reports/001-backburners.json', import.meta.url),
     ));
   } catch {
-    context.skip('The uploaded raw export intentionally has stale filesystem manifest paths');
+    await assert.rejects(
+      () => loadInput(inputDirectory),
+      /reports[\\/]001-backburners\.json: could not be read/,
+    );
     return;
   }
-  const input = await loadInput(fileURLToPath(new URL('../sample-data', import.meta.url)));
+  const input = await loadInput(inputDirectory);
 
   assert.equal(input.departments.length, 14);
   assert.equal(
