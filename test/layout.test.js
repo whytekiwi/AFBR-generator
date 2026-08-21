@@ -77,3 +77,58 @@ test('splits oversized Markdown into pageable content blocks', () => {
   assert.ok(markdownBlocks.length > 1);
   assert.ok(markdownBlocks.every((block) => block.markdown.length <= 450));
 });
+
+test('uses the normalized outline order for sections, departments, and images', () => {
+  const admin = {
+    id: 'admin',
+    name: 'Admin',
+    teams: [
+      {
+        id: 'one',
+        name: 'One',
+        authorName: null,
+        notReceived: true,
+        sections: [],
+      },
+      {
+        id: 'two',
+        name: 'Two',
+        authorName: null,
+        notReceived: true,
+        sections: [],
+      },
+    ],
+  };
+  const model = {
+    departments: [admin],
+    outline: [
+      { type: 'section', id: 'welcome', title: 'Welcome', body: 'Hello.' },
+      { type: 'contents', id: 'contents' },
+      {
+        type: 'department',
+        department: admin,
+        items: [
+          { type: 'report', team: admin.teams[0] },
+          { type: 'image', id: 'photo', src: 'photo.jpg' },
+          { type: 'report', team: admin.teams[1] },
+        ],
+      },
+    ],
+  };
+  const { blocks } = createLayoutBlocks(model);
+  const measurements = Object.fromEntries(Object.keys(blocks).map((id) => [id, 100]));
+  const plan = createSpreadPlan(model, measurements);
+
+  assert.deepEqual(
+    plan.spreads.map(({ type }) => type),
+    [
+      'content-section',
+      'front-matter',
+      'department-start',
+      'image-insert',
+      'department-continuation',
+    ],
+  );
+  assert.equal(plan.pageNumbers.welcome, 2);
+  assert.equal(plan.pageNumbers.admin, 4);
+});

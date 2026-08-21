@@ -29,6 +29,29 @@ export function createDocumentModel(input) {
       };
     }),
   }));
+  const teamsById = new Map(
+    departments.flatMap((department) => department.teams.map((team) => [team.id, team])),
+  );
+  const departmentsById = new Map(departments.map((department) => [department.id, department]));
+  const outline = input.outline?.map((item) => {
+    if (item.type === 'department') {
+      return {
+        type: 'department',
+        department: departmentsById.get(item.department.id),
+        items: item.items.map((child) => child.type === 'report'
+          ? { type: 'report', team: teamsById.get(child.team.id) }
+          : child),
+      };
+    }
+    return item;
+  }) ?? null;
+  const tableOfContents = outline
+    ? outline
+        .filter((item) => item.type === 'section' || item.type === 'department')
+        .map((item) => item.type === 'section'
+          ? { id: item.id, name: item.title }
+          : { id: item.department.id, name: item.department.name })
+    : departments.map(({ id, name }) => ({ id, name }));
 
   return {
     document: input.manifest.document,
@@ -36,7 +59,8 @@ export function createDocumentModel(input) {
     frontMatter: input.manifest.frontMatter ?? {},
     financials: input.manifest.financials ?? {},
     inserts: input.inserts,
-    tableOfContents: departments.map(({ id, name }) => ({ id, name })),
+    outline,
+    tableOfContents,
     inputDirectory: input.inputDirectory,
   };
 }

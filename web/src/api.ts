@@ -1,4 +1,10 @@
-import type { Report, ReportSummary, ReportUpsert } from './types';
+import type {
+  DocumentOutline,
+  Report,
+  ReportSummary,
+  ReportUpsert,
+  UploadedMedia,
+} from './types';
 
 type ReportListResponse = {
   items: ReportSummary[];
@@ -108,5 +114,31 @@ export const updateReport = async (
 export const deleteReport = async (id: string): Promise<void> => {
   await request<null>(`/api/reports/${encodeURIComponent(id)}`, {
     method: 'DELETE',
+  });
+};
+
+export const fetchDocumentOutline = async (
+  signal?: AbortSignal,
+): Promise<DocumentOutline> =>
+  request<DocumentOutline>('/api/document', {
+    signal,
+  });
+
+export const updateDocumentOutline = async (
+  outline: DocumentOutline,
+): Promise<DocumentOutline> =>
+  request<DocumentOutline>('/api/document', {
+    method: 'PUT',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(outline),
+  });
+
+export const uploadMedia = async (file: File): Promise<UploadedMedia> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return request<UploadedMedia>('/api/media', {
+    method: 'POST',
+    body: formData,
   });
 };

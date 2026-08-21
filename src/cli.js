@@ -44,7 +44,7 @@ try {
 
   console.log(`Generated ${outputFile}`);
   console.log(
-    `Department pages: ${Object.entries(pageNumbers)
+    `Contents pages: ${Object.entries(pageNumbers)
       .map(([id, page]) => `${id}=${page}`)
       .join(', ')}`,
   );

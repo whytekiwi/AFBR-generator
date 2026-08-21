@@ -33,6 +33,13 @@ settings:
 
 - `AZURE_STORAGE_CONNECTION_STRING`
 - `REPORTS_CONTAINER` (optional; defaults to `afterburn-reports`)
+- `DOCUMENT_CONTAINER` (optional; defaults to `afterburn-document`)
+
+The **Reports** workspace edits individual team reports. The **Document outline**
+workspace controls the final order, custom Markdown sections, departments, team
+reports, and uploaded images. Outline data is stored in `manifest.json`, custom
+sections in `sections/*.md`, and image assets in `media/*` within the document
+container.
 
 Authentication is intentionally not implemented by this application. Azure Easy
 Auth can protect the deployed routes separately.
@@ -57,7 +64,7 @@ Generate a PDF booklet from an input directory:
 ```powershell
 npm install
 npx playwright install chromium
-npm run render -- --input sample-data --output output/afterburn-report.pdf
+node src\cli.js --input sample-data --output output\afterburn-report.pdf
 ```
 
 The generator performs a two-pass render. It first measures final department
