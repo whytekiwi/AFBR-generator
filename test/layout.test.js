@@ -203,6 +203,38 @@ test('rejoins oversized-paragraph fragments sharing a virtual page, but keeps a 
   assert.equal(tightFragmentIds.length, 2);
 });
 
+test('preserves a list marker when rejoining paginated Markdown fragments', () => {
+  const admin = {
+    id: 'admin',
+    name: 'Admin',
+    teams: [
+      {
+        id: 'admin-team',
+        name: 'Admin Team',
+        authorName: null,
+        notReceived: false,
+        sections: [
+          {
+            id: 'overview',
+            title: 'Overview',
+            markdown: `Introduction\n${'- A list item that adds enough length to cross a block boundary.\n'.repeat(10)}`,
+          },
+        ],
+      },
+    ],
+  };
+  const model = { departments: [admin], frontMatter: {}, financials: {}, inserts: [] };
+  const { blocks } = createLayoutBlocks(model);
+  const measurements = Object.fromEntries(Object.keys(blocks).map((id) => [id, 10]));
+  const plan = createSpreadPlan(model, measurements);
+  const markdown = Object.values(plan.blocks)
+    .filter((block) => block.type === 'report-markdown')
+    .map((block) => block.markdown)
+    .join('\n');
+
+  assert.match(markdown, /\n- A list item/);
+});
+
 test('uses the normalized outline order for sections, departments, and images', () => {
   const admin = {
     id: 'admin',

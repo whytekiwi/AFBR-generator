@@ -227,7 +227,8 @@ function mergeContinuations(pageUnits, blocks) {
     const previousBlock = previousUnit ? blocks[previousUnit.blockIds.at(-1)] : null;
 
     if (block?.type === 'report-markdown' && block.continuation && previousBlock?.type === 'report-markdown') {
-      previousBlock.markdown = `${previousBlock.markdown} ${block.markdown}`;
+      const separator = /^(?:\s*[-*]\s+|\s*\d+\.\s+|#{1,6}\s+)/.test(block.markdown) ? '\n' : ' ';
+      previousBlock.markdown = `${previousBlock.markdown}${separator}${block.markdown}`;
       continue;
     }
     merged.push(unit);
