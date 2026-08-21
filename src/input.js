@@ -245,7 +245,12 @@ export async function loadInput(inputDirectory) {
       if (item.type === 'image') {
         const src = imagePath(item, location);
         await access(resolveWithin(inputDirectory, src, `${location}.src`));
-        outline.push({ ...item, src, fullWidth: item.fullWidth === true });
+        outline.push({
+          ...item,
+          src,
+          fullWidth: item.fullWidth === true,
+          fullPage: item.fullPage === true,
+        });
         continue;
       }
       if (item.type === 'department') {
@@ -261,11 +266,16 @@ export async function loadInput(inputDirectory) {
             if (!team || !department.teams.some(({ id }) => id === reportId)) {
               fail(`${childLocation}.reportId`, `references unknown report "${reportId}"`);
             }
-            children.push({ type: 'report', team });
+            children.push({ type: 'report', team, pageBreakAfter: child.pageBreakAfter === true });
           } else if (child.type === 'image') {
             const src = imagePath(child, childLocation);
             await access(resolveWithin(inputDirectory, src, `${childLocation}.src`));
-            children.push({ ...child, src, fullWidth: false });
+            children.push({
+              ...child,
+              src,
+              fullWidth: child.fullWidth === true,
+              fullPage: child.fullPage === true,
+            });
           } else {
             fail(`${childLocation}.type`, 'must equal "report" or "image"');
           }

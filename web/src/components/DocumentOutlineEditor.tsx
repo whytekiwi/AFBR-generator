@@ -430,7 +430,7 @@ export function DocumentOutlineEditor({
 
     updateDepartment(departmentId, (department) => ({
       ...department,
-      items: [...department.items, { type: 'report', reportId: selectedReportId }],
+      items: [...department.items, { type: 'report', reportId: selectedReportId, pageBreakAfter: false }],
     }));
 
     setDepartmentSelections((currentSelections) => ({
@@ -801,19 +801,19 @@ export function DocumentOutlineEditor({
 
                       <label className="empty-report-toggle">
                         <input
-                          checked={item.fullWidth}
+                          checked={item.fullPage || item.fullWidth}
                           onChange={(event) =>
                             updateOutlineItems((items) =>
                               items.map((currentItem) =>
                                 currentItem.type === 'image' && currentItem.id === item.id
-                                  ? { ...currentItem, fullWidth: event.target.checked }
+                                  ? { ...currentItem, fullPage: event.target.checked, fullWidth: false }
                                   : currentItem,
                               ),
                             )
                           }
                           type="checkbox"
                         />
-                        Full width image
+                        Full page image
                       </label>
                     </div>
                   </div>
@@ -972,11 +972,34 @@ export function DocumentOutlineEditor({
                                 </div>
 
                                 {childItem.type === 'report' ? (
-                                  <p className="field-hint department-item-card__copy">
-                                    {summary
-                                      ? `${summary.department} · ${summary.authorName}`
-                                      : 'Report summary unavailable. The report ID will still be saved.'}
-                                  </p>
+                                  <div className="department-item-card__copy">
+                                    <p className="field-hint">
+                                      {summary
+                                        ? `${summary.department} · ${summary.authorName}`
+                                        : 'Report summary unavailable. The report ID will still be saved.'}
+                                    </p>
+                                    <label className="empty-report-toggle">
+                                      <input
+                                        checked={childItem.pageBreakAfter}
+                                        onChange={(event) =>
+                                          updateDepartment(item.id, (department) => ({
+                                            ...department,
+                                            items: department.items.map((departmentItem) =>
+                                              departmentItem.type === 'report' &&
+                                              departmentItem.reportId === childItem.reportId
+                                                ? {
+                                                    ...departmentItem,
+                                                    pageBreakAfter: event.target.checked,
+                                                  }
+                                                : departmentItem,
+                                            ),
+                                          }))
+                                        }
+                                        type="checkbox"
+                                      />
+                                      Force page break after this report
+                                    </label>
+                                  </div>
                                 ) : (
                                   <div className="image-fields image-fields--nested">
                                     <div className="image-preview-card">
@@ -1050,6 +1073,28 @@ export function DocumentOutlineEditor({
                                           value={childItem.caption}
                                         />
                                       </div>
+
+                                      <label className="empty-report-toggle">
+                                        <input
+                                          checked={childItem.fullWidth}
+                                          onChange={(event) =>
+                                            updateDepartment(item.id, (department) => ({
+                                              ...department,
+                                              items: department.items.map((departmentItem) =>
+                                                departmentItem.type === 'image' &&
+                                                departmentItem.id === childItem.id
+                                                  ? {
+                                                      ...departmentItem,
+                                                      fullWidth: event.target.checked,
+                                                    }
+                                                  : departmentItem,
+                                              ),
+                                            }))
+                                          }
+                                          type="checkbox"
+                                        />
+                                        Full page image
+                                      </label>
                                     </div>
                                   </div>
                                 )}

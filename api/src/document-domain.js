@@ -32,6 +32,9 @@ function validateImage(item, field, errors, seenIds) {
   if (item.fullWidth !== undefined && typeof item.fullWidth !== 'boolean') {
     errors.push({ field: `${field}.fullWidth`, message: 'Must be a Boolean' });
   }
+  if (item.fullPage !== undefined && typeof item.fullPage !== 'boolean') {
+    errors.push({ field: `${field}.fullPage`, message: 'Must be a Boolean' });
+  }
   return {
     type: 'image',
     id: id(item.id, `${field}.id`, errors, seenIds),
@@ -41,6 +44,7 @@ function validateImage(item, field, errors, seenIds) {
     altText: text(item.altText ?? '', `${field}.altText`, errors, { required: false }),
     caption: text(item.caption ?? '', `${field}.caption`, errors, { required: false }),
     fullWidth: item.fullWidth ?? false,
+    fullPage: item.fullPage ?? false,
   };
 }
 
@@ -104,7 +108,10 @@ export function validateDocumentOutline(document) {
             errors.push({ field: `${childField}.reportId`, message: `Duplicate report "${reportId}"` });
           }
           seenReports.add(reportId);
-          return { type: 'report', reportId };
+          if (child.pageBreakAfter !== undefined && typeof child.pageBreakAfter !== 'boolean') {
+            errors.push({ field: `${childField}.pageBreakAfter`, message: 'Must be a Boolean' });
+          }
+          return { type: 'report', reportId, pageBreakAfter: child.pageBreakAfter ?? false };
         }
         errors.push({ field: `${childField}.type`, message: 'Must be "report" or "image"' });
         return null;

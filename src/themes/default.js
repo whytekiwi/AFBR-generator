@@ -40,21 +40,27 @@ async function imageSource(src, inputDirectory, contentType) {
 }
 
 const DEPARTMENT_COLOURS = [
-  '#2F6690',
-  '#9A5B13',
-  '#6B4E9B',
-  '#16756B',
-  '#A5445B',
-  '#356859',
-  '#806517',
+  '#BE5555',
+  '#AA6441',
+  '#907237',
+  '#7E7730',
+  '#6A7E30',
+  '#458131',
+  '#328547',
+  '#31816D',
+  '#387D94',
+  '#5175BD',
+  '#736BC7',
+  '#9160C3',
+  '#B946B9',
 ];
 
-function departmentIdentity(department) {
-  const hash = [...department.id].reduce(
-    (value, character) => (value * 31 + character.charCodeAt(0)) >>> 0,
-    0,
-  );
-  return { colour: DEPARTMENT_COLOURS[hash % DEPARTMENT_COLOURS.length] };
+function departmentIdentity(departmentIndex) {
+  return { colour: DEPARTMENT_COLOURS[departmentIndex % DEPARTMENT_COLOURS.length] };
+}
+
+function departmentIndex(model, department) {
+  return model.departments.findIndex(({ id }) => id === department.id);
 }
 
 function renderBlock(block, imageSources = new Map()) {
@@ -75,6 +81,8 @@ function renderBlock(block, imageSources = new Map()) {
       return `<section class="layout-block report-empty" data-layout-block="${escapeHtml(block.id)}"><p>No response provided.</p></section>`;
     case 'department-image':
       return `<figure class="layout-block department-image" data-layout-block="${escapeHtml(block.id)}"><img src="${imageSources.get(block.insert.id) ?? ''}" alt="${escapeHtml(block.insert.altText ?? '')}">${block.insert.caption ? `<figcaption>${escapeHtml(block.insert.caption)}</figcaption>` : ''}</figure>`;
+    case 'department-image-full':
+      return `<figure class="layout-block department-image-full" data-layout-block="${escapeHtml(block.id)}"><img src="${imageSources.get(block.insert.id) ?? ''}" alt="${escapeHtml(block.insert.altText ?? '')}">${block.insert.caption ? `<figcaption>${escapeHtml(block.insert.caption)}</figcaption>` : ''}</figure>`;
     default:
       throw new Error(`Unsupported layout block type "${block.type}"`);
   }
@@ -111,6 +119,9 @@ function bodyStyles() {
     .department-image { height: 92mm; margin: auto 0 0; max-height: 92mm; overflow: hidden; padding-bottom: 2mm; width: 100%; }
     .department-image img { display: block; height: auto; max-height: 84mm; object-fit: contain; width: 100%; }
     .department-image figcaption { color: #52606d; font-size: 7.5pt; margin-top: 1mm; }
+    .department-image-full { align-items: center; display: flex; flex: 1 1 auto; flex-direction: column; height: 100%; justify-content: center; overflow: hidden; padding-bottom: 0; width: 100%; }
+    .department-image-full img { display: block; max-height: 100%; max-width: 100%; object-fit: contain; }
+    .department-image-full figcaption { color: #52606d; flex: 0 0 auto; font-size: 7.5pt; margin-top: 2mm; }
     .department-start .booklet-page, .department-continuation .booklet-page { display: flex; flex-direction: column; }
   `;
 }
@@ -161,10 +172,12 @@ async function renderSpread(spread, model, plan, imageSources) {
       model.inputDirectory,
       spread.insert.contentType,
     );
-    if (!spread.department && spread.insert.fullWidth) {
+    if (!spread.department && (spread.insert.fullPage || spread.insert.fullWidth)) {
       return `<section class="spread image-spread"><figure><img src="${source}" alt="${escapeHtml(spread.insert.altText ?? '')}">${spread.insert.caption ? `<figcaption>${escapeHtml(spread.insert.caption)}</figcaption>` : ''}</figure>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
     }
-    const identity = spread.departmentStart ? departmentIdentity(spread.department) : null;
+    const identity = spread.departmentStart
+      ? departmentIdentity(departmentIndex(model, spread.department))
+      : null;
     const className = identity ? 'spread image-spread department-start' : 'spread image-spread';
     const style = identity ? ` style="--department-colour: ${identity.colour}"` : '';
     const hero = identity
@@ -190,7 +203,9 @@ async function renderSpread(spread, model, plan, imageSources) {
     return `<section class="spread front-spread"><div class="spread-grid">${pages.join('')}</div>${renderPageFooter(model.document, spread.pdfPageNumber)}${renderWatermark(model.document)}</section>`;
   }
 
-  const identity = departmentIdentity(spread.department);
+  const identity = departmentIdentity(
+    departmentIndex(model, spread.department),
+  );
   const isStart = spread.type === 'department-start';
   const className = isStart ? 'department-start' : 'department-continuation';
   const pages = spread.slots.map(

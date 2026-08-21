@@ -256,3 +256,57 @@ test('uses the normalized outline order for sections, departments, and images', 
   assert.equal(plan.pageNumbers.welcome, 2);
   assert.equal(plan.pageNumbers.admin, 3);
 });
+
+test('uses fullPage for top-level image spreads and fullWidth for department-image blocks', () => {
+  const department = {
+    id: 'admin',
+    name: 'Admin',
+    teams: [
+      {
+        id: 'admin-team',
+        name: 'Admin Team',
+        authorName: null,
+        notReceived: true,
+        sections: [],
+      },
+    ],
+  };
+
+  const model = {
+    departments: [department],
+    outline: [
+      {
+        type: 'image',
+        id: 'hero-image',
+        src: 'hero.jpg',
+        altText: 'Hero',
+        caption: 'Hero caption',
+        fullWidth: false,
+        fullPage: true,
+      },
+      {
+        type: 'department',
+        department,
+        items: [
+          {
+            type: 'image',
+            id: 'department-image',
+            src: 'dept.jpg',
+            altText: 'Department',
+            caption: 'Department caption',
+            fullWidth: true,
+          },
+        ],
+      },
+    ],
+    frontMatter: {},
+    financials: {},
+    inserts: [],
+  };
+
+  const plan = createSpreadPlan(model, {});
+  assert.equal(plan.spreads[0].insert.fullPage, true);
+
+  const { blocks } = createLayoutBlocks(model);
+  assert.equal(blocks['image:department-image'].type, 'department-image-full');
+});

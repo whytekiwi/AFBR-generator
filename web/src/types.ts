@@ -105,11 +105,13 @@ export type ImageItem = {
   altText: string;
   caption: string;
   fullWidth: boolean;
+  fullPage: boolean;
 };
 
 export type ReportItem = {
   type: 'report';
   reportId: string;
+  pageBreakAfter: boolean;
 };
 
 export type DepartmentChildItem = ReportItem | ImageItem;

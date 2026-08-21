@@ -40,7 +40,7 @@ export function createDocumentModel(input) {
         type: 'department',
         department: departmentsById.get(item.department.id),
         items: item.items.map((child) => child.type === 'report'
-          ? { type: 'report', team: teamsById.get(child.team.id) }
+          ? { type: 'report', team: teamsById.get(child.team.id), pageBreakAfter: child.pageBreakAfter === true }
           : child),
       };
     }

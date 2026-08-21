@@ -70,7 +70,7 @@ function addDepartmentImageBlocks(outline, blocks) {
       if (child.type === 'image') {
         addBlock(blocks, {
           id: `image:${child.id}`,
-          type: 'department-image',
+          type: child.fullWidth ? 'department-image-full' : 'department-image',
           insert: child,
         });
       }
@@ -241,6 +241,15 @@ function fillVirtualPage(units, measurements, capacity, blocks) {
 
   while (units.length > 0) {
     const next = units[0];
+
+    // solo units (full-page images) always occupy an entire virtual page on their own
+    if (next.solo) {
+      if (used > 0) break;
+      pageUnits.push(units.shift());
+      used = capacity;
+      break;
+    }
+
     const height = unitHeight(next, measurements);
 
     if (height > capacity) {
@@ -250,6 +259,9 @@ function fillVirtualPage(units, measurements, capacity, blocks) {
 
     pageUnits.push(units.shift());
     used += height;
+
+    // a manual break forces whatever comes next onto a fresh virtual page
+    if (next.breakAfter) break;
   }
 
   return { units: mergeContinuations(pageUnits, blocks), used };
@@ -376,11 +388,14 @@ export function createSpreadPlan(model, measurements) {
         for (let childIndex = 0; childIndex < item.items.length; childIndex += 1) {
           const child = item.items[childIndex];
           if (child.type === 'report') {
-            pending.push(...copyUnits(teamUnits.get(child.team.id)));
+            const teamPendingUnits = copyUnits(teamUnits.get(child.team.id));
+            if (child.pageBreakAfter) teamPendingUnits.at(-1).breakAfter = true;
+            pending.push(...teamPendingUnits);
           } else {
             pending.push({
               id: `department-image:${child.id}`,
               blockIds: [`image:${child.id}`],
+              ...(child.fullWidth ? { solo: true } : {}),
             });
           }
         }
