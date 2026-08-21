@@ -438,6 +438,14 @@ img {
   color: #20324c;
 }
 
+.empty-report-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #20324c;
+  font-weight: 700;
+}
+
 .field-hint,
 .placeholder-text {
   margin: 0.2rem 0 0;

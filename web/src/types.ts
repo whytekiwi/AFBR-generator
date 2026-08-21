@@ -19,12 +19,13 @@ export type MarkdownFieldKey = keyof typeof markdownFieldLabels;
 
 export type ReportBodyFields = Record<MarkdownFieldKey, string>;
 
-export type Report = ReportSummary & ReportBodyFields;
+export type Report = ReportSummary & ReportBodyFields & { empty: boolean };
 
 export type ReportUpsert = {
   authorName: string;
   team: string;
   department: string;
+  empty: boolean;
 } & ReportBodyFields;
 
 export type EditableReport = ReportUpsert &
@@ -38,6 +39,7 @@ export const createEmptyReport = (): EditableReport => ({
   authorName: '',
   team: '',
   department: '',
+  empty: false,
   generalOverview: '',
   crewPerformance: '',
   resources: '',
@@ -50,6 +52,7 @@ export const createEditableFromReport = (report: Report): EditableReport => ({
   authorName: report.authorName,
   team: report.team,
   department: report.department,
+  empty: report.empty,
   lastModified: report.lastModified,
   etag: report.etag,
   generalOverview: report.generalOverview,
@@ -63,6 +66,7 @@ export const toUpsertPayload = (report: EditableReport): ReportUpsert => ({
   authorName: report.authorName,
   team: report.team,
   department: report.department,
+  empty: report.empty,
   generalOverview: report.generalOverview,
   crewPerformance: report.crewPerformance,
   resources: report.resources,

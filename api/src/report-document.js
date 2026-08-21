@@ -36,6 +36,10 @@ export function validateReport(report) {
   requireText(report, 'team', 'Team', errors);
   requireText(report, 'department', 'Department', errors);
 
+  if (report.empty !== undefined && typeof report.empty !== 'boolean') {
+    errors.push({ field: 'empty', message: 'Must be a Boolean' });
+  }
+
   for (const [field] of REPORT_SECTION_FIELDS) {
     if (report[field] !== undefined && typeof report[field] !== 'string') {
       errors.push({ field, message: 'Must be text' });
@@ -47,6 +51,7 @@ export function validateReport(report) {
     authorName: report.authorName.trim(),
     team: report.team.trim(),
     department: report.department.trim(),
+    empty: report.empty ?? false,
     ...Object.fromEntries(
       REPORT_SECTION_FIELDS.map(([field]) => [field, report[field]?.trim() ?? '']),
     ),
@@ -65,6 +70,7 @@ export function serializeReportMarkdown(report) {
     authorName: normalized.authorName,
     team: normalized.team,
     department: normalized.department,
+    empty: normalized.empty,
   });
 }
 
@@ -102,6 +108,7 @@ export function parseReportMarkdown(markdown) {
     authorName: parsed.data.authorName,
     team: parsed.data.team,
     department: parsed.data.department,
+    empty: parsed.data.empty ?? false,
     ...sections,
   });
 }
@@ -125,6 +132,7 @@ export function createReportMetadata(report) {
     authorname: encodeMetadata(normalized.authorName),
     team: encodeMetadata(normalized.team),
     department: encodeMetadata(normalized.department),
+    empty: normalized.empty,
     searchtext: encodeMetadata(
       `${normalized.authorName} ${normalized.team} ${normalized.department}`.toLowerCase(),
     ),

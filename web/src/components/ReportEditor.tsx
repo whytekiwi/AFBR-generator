@@ -21,6 +21,7 @@ type ReportEditorProps = {
   onBack: () => void;
   onChangeIdentityField: (field: IdentityField, value: string) => void;
   onChangeMarkdownField: (field: MarkdownFieldKey, value: string) => void;
+  onChangeEmpty: (value: boolean) => void;
   onDelete: () => void;
   onRetry: () => void;
   onSave: () => void;
@@ -79,6 +80,7 @@ export function ReportEditor({
   onBack,
   onChangeIdentityField,
   onChangeMarkdownField,
+  onChangeEmpty,
   onDelete,
   onRetry,
   onSave,
@@ -89,7 +91,7 @@ export function ReportEditor({
       <section className="editor-panel">
         <div className="state-card">
           <h2>Loading report</h2>
-          <p>Pulling the latest content from the API…</p>
+          <p>Pulling the latest content from the APIï¿½</p>
         </div>
       </section>
     );
@@ -158,7 +160,7 @@ export function ReportEditor({
                 onClick={onDelete}
                 type="button"
               >
-                {isDeleting ? 'Deleting…' : 'Delete'}
+                {isDeleting ? 'Deletingï¿½' : 'Delete'}
               </button>
             ) : null}
 
@@ -167,7 +169,7 @@ export function ReportEditor({
               disabled={!canSave || isSaving || isDeleting}
               type="submit"
             >
-              {isSaving ? 'Saving…' : 'Save report'}
+              {isSaving ? 'Savingï¿½' : 'Save report'}
             </button>
           </div>
         </div>
@@ -208,6 +210,17 @@ export function ReportEditor({
             />
           ))}
         </div>
+
+        {markdownFieldKeys.every((field) => report[field].trim() === '') ? (
+          <label className="empty-report-toggle">
+            <input
+              checked={report.empty}
+              onChange={(event) => onChangeEmpty(event.target.checked)}
+              type="checkbox"
+            />
+            Mark this report as empty
+          </label>
+        ) : null}
       </form>
     </section>
   );

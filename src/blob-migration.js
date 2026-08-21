@@ -22,6 +22,7 @@ function reportFromSource(source) {
       authorName: revisionAuthor || source.AuthorName,
       team: source.Team,
       department: source.Department,
+      empty: source.Empty === true,
       generalOverview: content.generalOverview ?? '',
       crewPerformance: content.crewPerformance ?? '',
       resources: content.resources ?? '',
@@ -95,6 +96,9 @@ function validateRawReport(value, path) {
     if (typeof value[field] !== 'string' || value[field].trim() === '') {
       throw new Error(`JSON file "${path}" is not a valid report: ${field} is required`);
     }
+  }
+  if (value.Empty !== undefined && typeof value.Empty !== 'boolean') {
+    throw new Error(`JSON file "${path}" is not a valid report: Empty must be a Boolean`);
   }
   const revisionFields = ['ReportFinal', 'ReportSubmission', 'ReportDraft'];
   if (!revisionFields.some((field) => Object.hasOwn(value, field))) {

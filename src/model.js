@@ -20,7 +20,8 @@ export function createDocumentModel(input) {
         id: team.id,
         name: team.name,
         authorName: content === null ? null : content?.authorName ?? team.report.AuthorName,
-        notReceived: content === null,
+        empty: content === null && team.report.Empty === true,
+        notReceived: content === null && team.report.Empty !== true,
         sections: REPORT_SECTIONS.map(([field, title]) => ({
           id: field,
           title,

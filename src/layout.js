@@ -20,8 +20,11 @@ function splitOversizedBlock(value) {
   let remaining = value;
 
   while (remaining.length > maximumLength) {
+    const lineIndex = remaining.lastIndexOf('\n', maximumLength);
     const whitespaceIndex = remaining.lastIndexOf(' ', maximumLength);
-    const boundary = whitespaceIndex > maximumLength / 2 ? whitespaceIndex : maximumLength;
+    const boundary = lineIndex > maximumLength / 2
+      ? lineIndex
+      : whitespaceIndex > maximumLength / 2 ? whitespaceIndex : maximumLength;
     chunks.push(remaining.slice(0, boundary).trimEnd());
     remaining = remaining.slice(boundary).trimStart();
   }
@@ -62,12 +65,12 @@ function createTeamUnits(team, blocks) {
     team,
   });
 
-  if (team.notReceived) {
-    const notReceivedId = addBlock(blocks, {
-      id: `team:${team.id}:not-received`,
-      type: 'not-received',
+  if (team.notReceived || team.empty) {
+    const statusId = addBlock(blocks, {
+      id: `team:${team.id}:${team.empty ? 'empty' : 'not-received'}`,
+      type: team.empty ? 'empty' : 'not-received',
     });
-    return [{ id: `team:${team.id}:not-received`, blockIds: [teamHeadingId, notReceivedId] }];
+    return [{ id: `team:${team.id}:${team.empty ? 'empty' : 'not-received'}`, blockIds: [teamHeadingId, statusId] }];
   }
 
   let isFirstUnit = true;
@@ -86,6 +89,7 @@ function createTeamUnits(team, blocks) {
         id: `team:${team.id}:section:${section.id}:content:${index}`,
         type: markdown === null ? 'report-empty' : 'report-markdown',
         markdown,
+        continuation: index > 0 && Boolean(markdown?.trimStart().match(/^[-*]\s+/)),
       });
       const blockIds = index === 0 ? [sectionHeadingId, contentId] : [contentId];
       if (isFirstUnit) {
@@ -117,6 +121,7 @@ function createContentSectionUnits(section, blocks) {
       id: `content:${section.id}:content:${index}`,
       type: markdown === null ? 'report-empty' : 'report-markdown',
       markdown,
+      continuation: index > 0 && Boolean(markdown?.trimStart().match(/^[-*]\s+/)),
     });
     return {
       id: `content:${section.id}:${index}`,

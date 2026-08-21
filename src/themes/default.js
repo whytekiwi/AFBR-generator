@@ -63,12 +63,14 @@ function renderBlock(block) {
       return `<section class="layout-block team-heading" data-layout-block="${escapeHtml(block.id)}"><div class="team-heading-row"><h2>${escapeHtml(block.team.name)}</h2>${block.team.authorName ? `<p class="author">${escapeHtml(block.team.authorName)}</p>` : ''}</div></section>`;
     case 'not-received':
       return `<section class="layout-block not-received" data-layout-block="${escapeHtml(block.id)}"><strong>Not received</strong><p>This team has not supplied a report.</p></section>`;
+    case 'empty':
+      return `<section class="layout-block not-received" data-layout-block="${escapeHtml(block.id)}"><strong>Role was empty</strong><p>During the event- this role was empty. It may be filled now, but if it feels like home, <a href="https://kiwiburn.com/participate/volunteer/">check our open positions here</a></p></section>`;
     case 'report-section-heading':
       return `<section class="layout-block report-section-heading" data-layout-block="${escapeHtml(block.id)}"><h3>${escapeHtml(block.title)}</h3></section>`;
     case 'content-section-heading':
       return `<section class="layout-block content-section-heading" data-layout-block="${escapeHtml(block.id)}"><h1>${escapeHtml(block.title)}</h1></section>`;
     case 'report-markdown':
-      return `<section class="layout-block report-markdown" data-layout-block="${escapeHtml(block.id)}">${renderMarkdown(block.markdown)}</section>`;
+      return `<section class="layout-block report-markdown${block.continuation ? ' report-markdown--continuation' : ''}" data-layout-block="${escapeHtml(block.id)}">${renderMarkdown(block.markdown)}</section>`;
     case 'report-empty':
       return `<section class="layout-block report-empty" data-layout-block="${escapeHtml(block.id)}"><p>No response provided.</p></section>`;
     default:
@@ -90,7 +92,10 @@ function bodyStyles() {
     .report-section-heading h3 { color: #243b53; font-size: 11pt; line-height: 1.2; margin: 0; }
     .content-section-heading { border-bottom: 1mm solid #52606d; margin-bottom: 4mm; padding-bottom: 3mm; }
     .content-section-heading h1 { color: #243b53; font-size: 22pt; line-height: 1.15; margin: 0; }
-    .report-markdown { overflow-wrap: anywhere; padding-bottom: 3mm; }
+    .report-markdown { overflow-wrap: anywhere; padding-bottom: 3mm; text-align: justify; }
+    .report-markdown:has(+ .report-markdown--continuation) { padding-bottom: 0; }
+    .report-markdown:has(+ .report-markdown--continuation) ul,
+    .report-markdown:has(+ .report-markdown--continuation) ol { margin-bottom: 0; }
     .report-markdown p { margin-bottom: 2.5mm; }
     .report-markdown ul, .report-markdown ol { margin: 0 0 2.5mm; padding-left: 5mm; }
     .report-empty p, .not-received p { color: #667085; font-style: italic; margin-bottom: 0; }

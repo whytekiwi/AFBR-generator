@@ -351,7 +351,15 @@ export default function App() {
 
   const handleMarkdownChange = (field: MarkdownFieldKey, value: string) => {
     setDraft((currentDraft) =>
-      currentDraft ? { ...currentDraft, [field]: value } : currentDraft,
+      currentDraft
+        ? { ...currentDraft, [field]: value, ...(value.trim() ? { empty: false } : {}) }
+        : currentDraft,
+    );
+  };
+
+  const handleEmptyChange = (value: boolean) => {
+    setDraft((currentDraft) =>
+      currentDraft ? { ...currentDraft, empty: value } : currentDraft,
     );
   };
 
@@ -546,6 +554,7 @@ export default function App() {
                 onBack={handleBackToList}
                 onChangeIdentityField={handleIdentityChange}
                 onChangeMarkdownField={handleMarkdownChange}
+                onChangeEmpty={handleEmptyChange}
                 onDelete={handleDelete}
                 onRetry={() => {
                   if (selectedId && selectedId !== 'new') {

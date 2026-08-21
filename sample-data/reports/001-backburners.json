@@ -2,6 +2,7 @@
     "Team":  "Backburners",
     "Department":  "Admin",
     "AuthorName":  "Alex Morgan",
+    "Empty":  true,
     "ReviewerRole":  "Department Lead",
     "ReviewerName":  "Ari Wilson",
     "ReportSubmission":  {

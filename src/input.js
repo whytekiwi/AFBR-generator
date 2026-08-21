@@ -43,6 +43,7 @@ async function readReport(path) {
       Team: report.team,
       Department: report.department,
       AuthorName: report.authorName,
+      Empty: report.empty,
       ReportFinal: report,
     };
   } catch (error) {
