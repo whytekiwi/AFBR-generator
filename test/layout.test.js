@@ -399,3 +399,101 @@ test('takes a dedicated full-page spread for a top-level image flagged fullWidth
   assert.equal(imageSpreads.length, 1);
   assert.equal(imageSpreads[0].insert.id, 'townmap');
 });
+
+test('creates a department-table block and honours pageBreakAfter for a top-level department table', () => {
+  const admin = {
+    id: 'admin',
+    name: 'Admin',
+    teams: [
+      { id: 'one', name: 'One', authorName: null, notReceived: true, sections: [] },
+      { id: 'two', name: 'Two', authorName: null, notReceived: true, sections: [] },
+    ],
+  };
+  const model = {
+    departments: [admin],
+    outline: [
+      {
+        type: 'department',
+        department: admin,
+        items: [
+          { type: 'report', team: admin.teams[0] },
+          { type: 'table', id: 'budget-table', markdown: '| A | B |\n| --- | --- |\n| 1 | 2 |', pageBreakAfter: true },
+          { type: 'report', team: admin.teams[1] },
+        ],
+      },
+    ],
+  };
+  const { blocks } = createLayoutBlocks(model);
+
+  assert.equal(blocks['table:budget-table'].type, 'department-table');
+  assert.equal(blocks['table:budget-table'].markdown, '| A | B |\n| --- | --- |\n| 1 | 2 |');
+
+  const measurements = Object.fromEntries(Object.keys(blocks).map((id) => [id, 100]));
+  const plan = createSpreadPlan(model, measurements);
+
+  const departmentUnitIds = plan.spreads
+    .flatMap((spread) => spread.slots ?? [])
+    .flatMap((slot) => slot.units ?? [])
+    .flatMap((unit) => unit.blockIds);
+
+  assert.ok(departmentUnitIds.includes('table:budget-table'));
+});
+
+test('creates a heading block for a titled department table and keeps it with the table in one unit', () => {
+  const admin = {
+    id: 'admin',
+    name: 'Admin',
+    teams: [],
+  };
+  const model = {
+    departments: [admin],
+    outline: [
+      {
+        type: 'department',
+        department: admin,
+        items: [
+          {
+            type: 'table',
+            id: 'budget-table',
+            title: 'Budget breakdown',
+            markdown: '| A | B |\n| --- | --- |\n| 1 | 2 |',
+            pageBreakAfter: false,
+          },
+        ],
+      },
+    ],
+  };
+  const { blocks } = createLayoutBlocks(model);
+
+  assert.equal(blocks['table-heading:budget-table'].type, 'department-table-heading');
+  assert.equal(blocks['table-heading:budget-table'].title, 'Budget breakdown');
+
+  const measurements = Object.fromEntries(Object.keys(blocks).map((id) => [id, 100]));
+  const plan = createSpreadPlan(model, measurements);
+
+  const tableUnit = plan.spreads
+    .flatMap((spread) => spread.slots ?? [])
+    .flatMap((slot) => slot.units ?? [])
+    .find((unit) => unit.blockIds.includes('table:budget-table'));
+
+  assert.deepEqual(tableUnit.blockIds, ['table-heading:budget-table', 'table:budget-table']);
+});
+
+test('omits the heading block for a department table without a title', () => {
+  const admin = { id: 'admin', name: 'Admin', teams: [] };
+  const model = {
+    departments: [admin],
+    outline: [
+      {
+        type: 'department',
+        department: admin,
+        items: [
+          { type: 'table', id: 'budget-table', markdown: '| A | B |\n| --- | --- |\n| 1 | 2 |' },
+        ],
+      },
+    ],
+  };
+  const { blocks } = createLayoutBlocks(model);
+
+  assert.equal(blocks['table-heading:budget-table'], undefined);
+});

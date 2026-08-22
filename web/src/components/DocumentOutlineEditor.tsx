@@ -11,6 +11,7 @@ import {
   type ImageItem,
   type OutlineItem,
   type ReportSummary,
+  type TableItem,
   type UploadedMedia,
 } from '../types';
 import { MarkdownField } from './MarkdownField';
@@ -69,6 +70,14 @@ const createImageItem = (media: UploadedMedia, seed: string): ImageItem => ({
   fullPage: false,
 });
 
+const createTableItem = (): TableItem => ({
+  type: 'table',
+  id: createOutlineNodeId('table'),
+  title: '',
+  markdown: '| Column A | Column B |\n| --- | --- |\n|  |  |',
+  pageBreakAfter: false,
+});
+
 const validateImageFile = (file: File): string | null => {
   const normalizedType = file.type.toLowerCase();
   const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
@@ -112,6 +121,17 @@ const getOutlineItemLabel = (item: OutlineItem): string => {
 
 const getDepartmentChildKey = (item: DepartmentChildItem, index: number) =>
   item.type === 'report' ? `report-${item.reportId}-${index}` : item.id;
+
+const getDepartmentChildLabel = (item: DepartmentChildItem): string => {
+  switch (item.type) {
+    case 'report':
+      return 'Report';
+    case 'table':
+      return 'Table';
+    case 'image':
+      return 'Image';
+  }
+};
 
 function FilePickerButton({
   buttonClassName = 'secondary-button',
@@ -440,6 +460,13 @@ export function DocumentOutlineEditor({
     }));
   };
 
+  const handleAddTableToDepartment = (departmentId: string) => {
+    updateDepartment(departmentId, (department) => ({
+      ...department,
+      items: [...department.items, createTableItem()],
+    }));
+  };
+
   const handleMoveDepartmentChild = (
     departmentId: string,
     childIndex: number,
@@ -466,7 +493,9 @@ export function DocumentOutlineEditor({
     const message =
       childItem.type === 'report'
         ? 'Remove this report from the department?'
-        : 'Remove this image from the department?';
+        : childItem.type === 'table'
+          ? 'Remove this table from the department?'
+          : 'Remove this image from the department?';
 
     if (!window.confirm(message)) {
       return;
@@ -894,6 +923,14 @@ export function DocumentOutlineEditor({
                           })
                         }
                       />
+                      <button
+                        className="secondary-button"
+                        disabled={isBusy}
+                        onClick={() => handleAddTableToDepartment(item.id)}
+                        type="button"
+                      >
+                        Add table
+                      </button>
                     </div>
 
                     {!reportsLoading && !reportsError && unplacedReports.length === 0 ? (
@@ -926,12 +963,14 @@ export function DocumentOutlineEditor({
                                     <span className="outline-order">{childIndex + 1}</span>
                                     <div>
                                       <p className="outline-type">
-                                        {childItem.type === 'report' ? 'Report' : 'Image'}
+                                        {getDepartmentChildLabel(childItem)}
                                       </p>
                                       <h4>
                                         {childItem.type === 'report'
                                           ? summary?.team ?? childItem.reportId
-                                          : childItem.fileName}
+                                          : childItem.type === 'table'
+                                            ? childItem.title.trim() || 'Untitled table'
+                                            : childItem.fileName}
                                       </h4>
                                     </div>
                                   </div>
@@ -999,6 +1038,90 @@ export function DocumentOutlineEditor({
                                         type="checkbox"
                                       />
                                       Force page break after this report
+                                    </label>
+                                  </div>
+                                ) : childItem.type === 'table' ? (
+                                  <div className="table-fields table-fields--nested">
+                                    <div className="field-group">
+                                      <label
+                                        className="field-label"
+                                        htmlFor={`${item.id}-${childItem.id}-title`}
+                                      >
+                                        Title (optional)
+                                      </label>
+                                      <input
+                                        className="text-input"
+                                        id={`${item.id}-${childItem.id}-title`}
+                                        onChange={(event) =>
+                                          updateDepartment(item.id, (department) => ({
+                                            ...department,
+                                            items: department.items.map((departmentItem) =>
+                                              departmentItem.type === 'table' &&
+                                              departmentItem.id === childItem.id
+                                                ? {
+                                                    ...departmentItem,
+                                                    title: event.target.value,
+                                                  }
+                                                : departmentItem,
+                                            ),
+                                          }))
+                                        }
+                                        placeholder="Give this table a heading"
+                                        type="text"
+                                        value={childItem.title}
+                                      />
+                                    </div>
+
+                                    <div className="field-group">
+                                      <label
+                                        className="field-label"
+                                        htmlFor={`${item.id}-${childItem.id}-markdown`}
+                                      >
+                                        Table Markdown
+                                      </label>
+                                      <textarea
+                                        className="text-area-input"
+                                        id={`${item.id}-${childItem.id}-markdown`}
+                                        onChange={(event) =>
+                                          updateDepartment(item.id, (department) => ({
+                                            ...department,
+                                            items: department.items.map((departmentItem) =>
+                                              departmentItem.type === 'table' &&
+                                              departmentItem.id === childItem.id
+                                                ? {
+                                                    ...departmentItem,
+                                                    markdown: event.target.value,
+                                                  }
+                                                : departmentItem,
+                                            ),
+                                          }))
+                                        }
+                                        placeholder="| Column A | Column B |&#10;| --- | --- |&#10;| Value | Value |"
+                                        rows={6}
+                                        value={childItem.markdown}
+                                      />
+                                    </div>
+
+                                    <label className="empty-report-toggle">
+                                      <input
+                                        checked={childItem.pageBreakAfter}
+                                        onChange={(event) =>
+                                          updateDepartment(item.id, (department) => ({
+                                            ...department,
+                                            items: department.items.map((departmentItem) =>
+                                              departmentItem.type === 'table' &&
+                                              departmentItem.id === childItem.id
+                                                ? {
+                                                    ...departmentItem,
+                                                    pageBreakAfter: event.target.checked,
+                                                  }
+                                                : departmentItem,
+                                            ),
+                                          }))
+                                        }
+                                        type="checkbox"
+                                      />
+                                      Force page break after this table
                                     </label>
                                   </div>
                                 ) : (

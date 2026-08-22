@@ -199,6 +199,7 @@ export async function materializeBlobInput({
           mediaIds.add(requireMediaId(child.mediaId, `${location}.mediaId`));
           continue;
         }
+        if (child.type === 'table') continue;
         const reportId = requireReportId(child.reportId, `${location}.reportId`);
         const reportBlobName = `${reportId}.md`;
         const reportDownload = await downloadBlob(

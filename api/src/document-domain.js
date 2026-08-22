@@ -48,6 +48,19 @@ function validateImage(item, field, errors, seenIds) {
   };
 }
 
+function validateTable(item, field, errors, seenIds) {
+  if (item.pageBreakAfter !== undefined && typeof item.pageBreakAfter !== 'boolean') {
+    errors.push({ field: `${field}.pageBreakAfter`, message: 'Must be a Boolean' });
+  }
+  return {
+    type: 'table',
+    id: id(item.id, `${field}.id`, errors, seenIds),
+    title: text(item.title ?? '', `${field}.title`, errors, { required: false }),
+    markdown: text(item.markdown, `${field}.markdown`, errors),
+    pageBreakAfter: item.pageBreakAfter ?? false,
+  };
+}
+
 export function validateDocumentOutline(document) {
   const errors = [];
   const seenIds = new Set();
@@ -102,6 +115,7 @@ export function validateDocumentOutline(document) {
           return null;
         }
         if (child.type === 'image') return validateImage(child, childField, errors, seenIds);
+        if (child.type === 'table') return validateTable(child, childField, errors, seenIds);
         if (child.type === 'report') {
           const reportId = text(child.reportId, `${childField}.reportId`, errors);
           if (reportId && seenReports.has(reportId)) {
@@ -113,7 +127,7 @@ export function validateDocumentOutline(document) {
           }
           return { type: 'report', reportId, pageBreakAfter: child.pageBreakAfter ?? false };
         }
-        errors.push({ field: `${childField}.type`, message: 'Must be "report" or "image"' });
+        errors.push({ field: `${childField}.type`, message: 'Must be "report", "image", or "table"' });
         return null;
       }).filter(Boolean);
       return department;

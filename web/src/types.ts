@@ -114,7 +114,15 @@ export type ReportItem = {
   pageBreakAfter: boolean;
 };
 
-export type DepartmentChildItem = ReportItem | ImageItem;
+export type TableItem = {
+  type: 'table';
+  id: string;
+  title: string;
+  markdown: string;
+  pageBreakAfter: boolean;
+};
+
+export type DepartmentChildItem = ReportItem | ImageItem | TableItem;
 
 export type DepartmentItem = {
   type: 'department';

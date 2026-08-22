@@ -76,3 +76,68 @@ test('manifest can use immutable section file versions', () => {
     },
   );
 });
+
+test('validates and normalizes a department table item', () => {
+  const outline = validateDocumentOutline({
+    version: 1,
+    items: [
+      {
+        type: 'department',
+        id: 'admin',
+        name: 'Admin',
+        items: [
+          {
+            type: 'table',
+            id: 'admin-budget',
+            title: 'Budget breakdown',
+            markdown: '| A | B |\n| --- | --- |\n| 1 | 2 |',
+            pageBreakAfter: true,
+          },
+        ],
+      },
+    ],
+  });
+
+  assert.deepEqual(outline.items[0].items[0], {
+    type: 'table',
+    id: 'admin-budget',
+    title: 'Budget breakdown',
+    markdown: '| A | B |\n| --- | --- |\n| 1 | 2 |',
+    pageBreakAfter: true,
+  });
+});
+
+test('defaults a department table title to an empty string when omitted', () => {
+  const outline = validateDocumentOutline({
+    version: 1,
+    items: [
+      {
+        type: 'department',
+        id: 'admin',
+        name: 'Admin',
+        items: [
+          { type: 'table', id: 'admin-budget', markdown: '| A | B |\n| --- | --- |\n| 1 | 2 |' },
+        ],
+      },
+    ],
+  });
+
+  assert.equal(outline.items[0].items[0].title, '');
+});
+
+test('rejects a department table item missing markdown content', () => {
+  assert.throws(
+    () => validateDocumentOutline({
+      version: 1,
+      items: [
+        {
+          type: 'department',
+          id: 'admin',
+          name: 'Admin',
+          items: [{ type: 'table', id: 'admin-budget' }],
+        },
+      ],
+    }),
+    DocumentValidationError,
+  );
+});

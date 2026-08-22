@@ -73,6 +73,19 @@ function addDepartmentImageBlocks(outline, blocks) {
           type: child.fullWidth ? 'department-image-full' : 'department-image',
           insert: child,
         });
+      } else if (child.type === 'table') {
+        if (child.title?.trim()) {
+          addBlock(blocks, {
+            id: `table-heading:${child.id}`,
+            type: 'department-table-heading',
+            title: child.title,
+          });
+        }
+        addBlock(blocks, {
+          id: `table:${child.id}`,
+          type: 'department-table',
+          markdown: child.markdown,
+        });
       }
     }
   }
@@ -399,6 +412,15 @@ export function createSpreadPlan(model, measurements) {
             const teamPendingUnits = copyUnits(teamUnits.get(child.team.id));
             if (child.pageBreakAfter) teamPendingUnits.at(-1).breakAfter = true;
             pending.push(...teamPendingUnits);
+          } else if (child.type === 'table') {
+            pending.push({
+              id: `department-table:${child.id}`,
+              blockIds: [
+                ...(child.title?.trim() ? [`table-heading:${child.id}`] : []),
+                `table:${child.id}`,
+              ],
+              ...(child.pageBreakAfter ? { breakAfter: true } : {}),
+            });
           } else {
             pending.push({
               id: `department-image:${child.id}`,

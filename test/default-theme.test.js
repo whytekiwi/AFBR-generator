@@ -75,3 +75,77 @@ test('renders a front-matter image slot inline alongside other virtual pages', a
   assert.match(html, /alt="Poster alt text"/);
   assert.match(html, /<figcaption>Poster caption<\/figcaption>/);
 });
+
+test('renders a department-table block as a markdown table', async () => {
+  const department = { id: 'admin', name: 'Admin', teams: [] };
+  const model = {
+    departments: [department],
+    document: { cycle: '2026', draft: { enabled: false } },
+    outline: [],
+    tableOfContents: [],
+    inputDirectory: '.',
+  };
+  const plan = {
+    blocks: {
+      'table:budget-table': {
+        id: 'table:budget-table',
+        type: 'department-table',
+        markdown: '| A | B |\n| --- | --- |\n| 1 | 2 |',
+      },
+    },
+    pageNumbers: {},
+    spreads: [
+      {
+        type: 'department-start',
+        department,
+        pdfPageNumber: 1,
+        slots: [
+          { units: [{ blockIds: ['table:budget-table'] }] },
+          { units: [] },
+        ],
+      },
+    ],
+  };
+
+  const html = await defaultTheme.renderBody(model, plan);
+
+  assert.match(html, /class="layout-block department-table"/);
+  assert.match(html, /<table><thead><tr><th>A<\/th><th>B<\/th><\/tr><\/thead><tbody><tr><td>1<\/td><td>2<\/td><\/tr><\/tbody><\/table>/);
+});
+
+test('renders a department-table-heading block with the table title', async () => {
+  const department = { id: 'admin', name: 'Admin', teams: [] };
+  const model = {
+    departments: [department],
+    document: { cycle: '2026', draft: { enabled: false } },
+    outline: [],
+    tableOfContents: [],
+    inputDirectory: '.',
+  };
+  const plan = {
+    blocks: {
+      'table-heading:budget-table': {
+        id: 'table-heading:budget-table',
+        type: 'department-table-heading',
+        title: 'Budget breakdown',
+      },
+    },
+    pageNumbers: {},
+    spreads: [
+      {
+        type: 'department-start',
+        department,
+        pdfPageNumber: 1,
+        slots: [
+          { units: [{ blockIds: ['table-heading:budget-table'] }] },
+          { units: [] },
+        ],
+      },
+    ],
+  };
+
+  const html = await defaultTheme.renderBody(model, plan);
+
+  assert.match(html, /class="layout-block department-table-heading"/);
+  assert.match(html, /<h3>Budget breakdown<\/h3>/);
+});

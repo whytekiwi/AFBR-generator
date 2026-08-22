@@ -276,8 +276,16 @@ export async function loadInput(inputDirectory) {
               fullWidth: child.fullWidth === true,
               fullPage: child.fullPage === true,
             });
+          } else if (child.type === 'table') {
+            children.push({
+              type: 'table',
+              id: requireString(child.id, `${childLocation}.id`),
+              title: typeof child.title === 'string' ? child.title : '',
+              markdown: requireString(child.markdown, `${childLocation}.markdown`),
+              pageBreakAfter: child.pageBreakAfter === true,
+            });
           } else {
-            fail(`${childLocation}.type`, 'must equal "report" or "image"');
+            fail(`${childLocation}.type`, 'must equal "report", "image", or "table"');
           }
         }
         outline.push({ type: 'department', department, items: children });

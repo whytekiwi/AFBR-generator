@@ -70,7 +70,7 @@ function renderBlock(block, imageSources = new Map()) {
     case 'not-received':
       return `<section class="layout-block not-received" data-layout-block="${escapeHtml(block.id)}"><strong>Not received</strong><p>This team has not supplied a report.</p></section>`;
     case 'empty':
-      return `<section class="layout-block not-received" data-layout-block="${escapeHtml(block.id)}"><strong>Role was empty</strong><p>During the event- this role was empty. It may be filled now, but if it feels like home, <a href="https://kiwiburn.com/participate/volunteer/">check our open positions here</a></p></section>`;
+      return `<section class="layout-block not-received" data-layout-block="${escapeHtml(block.id)}"><strong>Role was empty for the burn.</strong><p>Tempted? <a href="https://kiwiburn.com/participate/volunteer/">Check our open positions.</a></p></section>`;
     case 'report-section-heading':
       return `<section class="layout-block report-section-heading" data-layout-block="${escapeHtml(block.id)}"><h3>${escapeHtml(block.title)}</h3></section>`;
     case 'content-section-heading':
@@ -83,6 +83,10 @@ function renderBlock(block, imageSources = new Map()) {
       return `<figure class="layout-block department-image" data-layout-block="${escapeHtml(block.id)}"><img src="${imageSources.get(block.insert.id) ?? ''}" alt="${escapeHtml(block.insert.altText ?? '')}">${block.insert.caption ? `<figcaption>${escapeHtml(block.insert.caption)}</figcaption>` : ''}</figure>`;
     case 'department-image-full':
       return `<figure class="layout-block department-image-full" data-layout-block="${escapeHtml(block.id)}"><img src="${imageSources.get(block.insert.id) ?? ''}" alt="${escapeHtml(block.insert.altText ?? '')}">${block.insert.caption ? `<figcaption>${escapeHtml(block.insert.caption)}</figcaption>` : ''}</figure>`;
+    case 'department-table-heading':
+      return `<section class="layout-block department-table-heading" data-layout-block="${escapeHtml(block.id)}"><h3>${escapeHtml(block.title)}</h3></section>`;
+    case 'department-table':
+      return `<section class="layout-block department-table" data-layout-block="${escapeHtml(block.id)}">${renderMarkdown(block.markdown)}</section>`;
     default:
       throw new Error(`Unsupported layout block type "${block.type}"`);
   }
@@ -122,6 +126,15 @@ function bodyStyles() {
     .department-image-full { align-items: center; display: flex; flex: 1 1 auto; flex-direction: column; height: 100%; justify-content: center; margin: 0; overflow: hidden; padding-bottom: 0; width: 100%; }
     .department-image-full img { display: block; max-height: 100%; max-width: 100%; object-fit: contain; }
     .department-image-full figcaption { color: #52606d; flex: 0 0 auto; font-size: 7.5pt; margin-top: 2mm; }
+    .department-table-heading { padding-bottom: 1mm; }
+    .department-table-heading h3 { color: #243b53; font-size: 11pt; line-height: 1.2; margin: 0; }
+    .department-table { padding-bottom: 3mm; }
+    table { border-collapse: collapse; font-size: 8.5pt; margin-bottom: 2.5mm; width: 100%; }
+    th, td { border: 1px solid #cbd2d9; padding: 1.5mm 2mm; text-align: left; }
+    th { background: #f0f4f8; }
+    blockquote.callout { background: #fffbea; border-left: 1.5mm solid #f0b429; margin: 0 0 2.5mm; padding: 2.5mm 4mm; }
+    blockquote.callout p { margin-bottom: 1.5mm; }
+    blockquote.callout p:last-child { margin-bottom: 0; }
     .department-start .booklet-page, .department-continuation .booklet-page { display: flex; flex-direction: column; }
   `;
 }
