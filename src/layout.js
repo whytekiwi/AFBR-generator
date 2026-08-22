@@ -361,8 +361,15 @@ export function createSpreadPlan(model, measurements) {
       } else if (item.type === 'section') {
         frontMatterQueue.push(...paginateSection(item));
       } else if (item.type === 'image') {
-        flushFrontMatter();
-        spreads.push({ type: 'image-insert', insert: item });
+        // fullPage/fullWidth images take a dedicated physical spread (both virtual
+        // pages); otherwise the image is queued as an ordinary virtual page, so it
+        // can share a spread with sections.
+        if (item.fullPage || item.fullWidth) {
+          flushFrontMatter();
+          spreads.push({ type: 'image-insert', insert: item });
+        } else {
+          frontMatterQueue.push({ type: 'image', insert: item });
+        }
       } else if (item.type === 'department') {
         flushFrontMatter();
         let isDepartmentStart = true;

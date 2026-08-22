@@ -342,3 +342,60 @@ test('uses fullPage for top-level image spreads and fullWidth for department-ima
   const { blocks } = createLayoutBlocks(model);
   assert.equal(blocks['image:department-image'].type, 'department-image-full');
 });
+
+test('queues a non-fullPage top-level image inline as its own virtual page instead of a dedicated spread', () => {
+  const model = {
+    departments: [],
+    outline: [
+      { type: 'section', id: 'welcome', title: 'Welcome', body: 'Hello.' },
+      { type: 'contents', id: 'contents' },
+      {
+        type: 'image',
+        id: 'poster',
+        src: 'poster.png',
+        altText: 'Poster',
+        caption: 'Poster caption',
+        fullWidth: false,
+        fullPage: false,
+      },
+      { type: 'section', id: 'chairs-report', title: 'Chairs report', body: 'Report body.' },
+    ],
+  };
+  const { blocks } = createLayoutBlocks(model);
+  const measurements = Object.fromEntries(Object.keys(blocks).map((id) => [id, 100]));
+  const plan = createSpreadPlan(model, measurements);
+
+  // No dedicated 'image-insert' spread; the image shares a virtual-page slot with sections.
+  assert.deepEqual(plan.spreads.map(({ type }) => type), ['front-matter', 'front-matter']);
+  const imageSlots = plan.spreads
+    .flatMap((spread) => spread.slots ?? [])
+    .filter((slot) => slot.type === 'image');
+  assert.equal(imageSlots.length, 1);
+  assert.equal(imageSlots[0].insert.id, 'poster');
+});
+
+test('takes a dedicated full-page spread for a top-level image flagged fullWidth outside a department', () => {
+  const model = {
+    departments: [],
+    outline: [
+      { type: 'section', id: 'welcome', title: 'Welcome', body: 'Hello.' },
+      {
+        type: 'image',
+        id: 'townmap',
+        src: 'townmap.jpg',
+        altText: 'Town map',
+        caption: 'Town map caption',
+        fullWidth: true,
+        fullPage: false,
+      },
+      { type: 'section', id: 'chairs-report', title: 'Chairs report', body: 'Report body.' },
+    ],
+  };
+  const { blocks } = createLayoutBlocks(model);
+  const measurements = Object.fromEntries(Object.keys(blocks).map((id) => [id, 100]));
+  const plan = createSpreadPlan(model, measurements);
+
+  const imageSpreads = plan.spreads.filter((spread) => spread.type === 'image-insert');
+  assert.equal(imageSpreads.length, 1);
+  assert.equal(imageSpreads[0].insert.id, 'townmap');
+});
